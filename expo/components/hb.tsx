@@ -18,9 +18,9 @@ export function Cover({ media, className, rounded = "rounded-xl" }: { media: Med
         <Text className="mt-2 text-center text-xs font-bold text-foreground" numberOfLines={3}>
           {media.title}
         </Text>
-        <Text className="mt-1 text-[10px]" style={{ color: colors.mutedForeground }}>
+        {media.year > 0 ? <Text className="mt-1 text-[10px]" style={{ color: colors.mutedForeground }}>
           {media.year}
-        </Text>
+        </Text> : null}
       </View>
     );
   }
