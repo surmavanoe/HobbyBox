@@ -1,0 +1,4 @@
+-- Placeholder for the migration already applied to the linked Supabase project.
+-- The remote migration history contains this version, but its SQL was applied
+-- outside this repo. Keeping this file lets `supabase db push` reconcile local
+-- and remote history so newer migrations can be applied.
