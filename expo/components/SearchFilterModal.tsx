@@ -1,0 +1,54 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import { FlatList, Modal, Pressable, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { Button } from "@/components/ui/Button";
+import { EMPTY_SEARCH_FILTERS, FILM_GENRES, RELEASE_DECADES, yearsInDecade, type SearchFilters } from "@/lib/searchFilters";
+import { useThemeColors } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+
+type Page = "root" | "decades" | "years" | "genres" | "ratings";
+interface Props { visible: boolean; onClose: () => void; value: SearchFilters; onChange: (value: SearchFilters) => void }
+
+export function SearchFilterModal({ visible, onClose, value, onChange }: Props) {
+  const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const [page, setPage] = useState<Page>("root");
+  const [decade, setDecade] = useState(1940);
+  const title = page === "root" ? "Filters" : page === "decades" ? "Release Date" : page === "years" ? `${decade}s` : page === "genres" ? "Genre" : "Ratings";
+  const close = () => { setPage("root"); onClose(); };
+  const rows = page === "root" ? ["Release Date", "Genre", "Ratings"] : page === "decades" ? RELEASE_DECADES.map((d) => `${d}s`) : page === "years" ? yearsInDecade(decade).map(String) : page === "genres" ? FILM_GENRES : ["Best to worst", "Worst to best"];
+  const select = (label: string) => {
+    if (page === "root") setPage(label === "Release Date" ? "decades" : label === "Genre" ? "genres" : "ratings");
+    else if (page === "decades") { setDecade(parseInt(label, 10)); setPage("years"); }
+    else if (page === "years") { onChange({ ...value, year: value.year === Number(label) ? null : Number(label) }); }
+    else if (page === "genres") onChange({ ...value, genre: value.genre === label ? null : label });
+    else { const order = label === "Best to worst" ? "best" : "worst"; onChange({ ...value, ratingOrder: value.ratingOrder === order ? null : order }); }
+  };
+  return (
+    <Modal visible={visible} animationType="slide" onRequestClose={close}>
+      <View className="flex-1 bg-background">
+        <View className="flex-row items-center border-b border-border px-4 pb-3" style={{ paddingTop: insets.top + 8, paddingLeft: insets.left + 16, paddingRight: insets.right + 16 }}>
+          {page !== "root" ? <Pressable onPress={() => setPage(page === "years" ? "decades" : "root")} accessibilityLabel="Back" className="min-h-[44px] min-w-[44px] items-center justify-center"><Ionicons name="arrow-back" size={24} color={colors.foreground} /></Pressable> : null}
+          <Text className="flex-1 text-2xl font-bold text-foreground">{title}</Text>
+          <Pressable onPress={close} accessibilityLabel="Close filters" className="min-h-[44px] min-w-[44px] items-center justify-center"><Ionicons name="close" size={26} color={colors.foreground} /></Pressable>
+        </View>
+        <FlatList data={rows} keyExtractor={(label) => label} contentContainerStyle={{ paddingHorizontal: 16, paddingLeft: insets.left + 16, paddingRight: insets.right + 16, paddingBottom: 20 }} renderItem={({ item }) => {
+          const selected = page === "years" ? value.year === Number(item) : page === "genres" ? value.genre === item : page === "ratings" ? value.ratingOrder === (item === "Best to worst" ? "best" : "worst") : false;
+          const summary = page === "root" ? item === "Release Date" ? value.year : item === "Genre" ? value.genre : value.ratingOrder === "best" ? "Best to worst" : value.ratingOrder === "worst" ? "Worst to best" : null : null;
+          return <Pressable onPress={() => select(item)} accessibilityRole="button" accessibilityState={{ selected }} className={cn("min-h-[60px] flex-row items-center gap-3 border-b border-border py-3 active:bg-card", selected && "bg-primary/10")}>
+            {page === "ratings" || (page === "root" && item === "Ratings") ? <View className="flex-row"><Ionicons name="arrow-up" size={20} color={colors.primary} /><Ionicons name="arrow-down" size={20} color={colors.primary} /></View> : page === "root" ? <Ionicons name={item === "Release Date" ? "calendar-outline" : "film-outline"} size={23} color={colors.primary} /> : null}
+            <Text className={cn("flex-1 text-base font-semibold", selected ? "text-primary" : "text-foreground")}>{item}</Text>
+            {summary ? <Text className="max-w-[140px] text-right text-sm text-primary">{summary}</Text> : null}
+            <Ionicons name={selected ? "checkmark" : page === "root" || page === "decades" ? "chevron-forward" : "ellipse-outline"} size={selected ? 22 : 18} color={selected ? colors.primary : colors.mutedForeground} />
+          </Pressable>;
+        }} />
+        <View className="gap-2 border-t border-border px-4 pt-3" style={{ paddingBottom: insets.bottom + 12, paddingLeft: insets.left + 16, paddingRight: insets.right + 16 }}>
+          <Button onPress={close} className="min-h-[52px]">Show results</Button>
+          <Button variant="ghost" onPress={() => onChange({ ...EMPTY_SEARCH_FILTERS })}>Reset filters</Button>
+        </View>
+      </View>
+    </Modal>
+  );
+}
