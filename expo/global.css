@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* RGB channels so tailwind.config.ts can add alpha; lib/theme.ts mirrors them as hex. iOS system colors, with the
+   accents from Apple's increased-contrast set and a darker light muted text so every pairing clears 4.5:1. */
+@layer base {
+  :root {
+    --background: 242 242 247;
+    --foreground: 0 0 0;
+    --card: 255 255 255;
+    --card-foreground: 0 0 0;
+    --primary: 0 64 221;
+    --primary-foreground: 255 255 255;
+    --secondary: 229 229 234;
+    --secondary-foreground: 0 0 0;
+    --muted: 229 229 234;
+    --muted-foreground: 92 92 97;
+    --destructive: 215 0 21;
+    --destructive-foreground: 255 255 255;
+    --border: 198 198 200;
+    --input: 229 229 234;
+  }
+
+  .dark:root {
+    --background: 0 0 0;
+    --foreground: 255 255 255;
+    --card: 28 28 30;
+    --card-foreground: 255 255 255;
+    --primary: 64 156 255;
+    --primary-foreground: 0 0 0;
+    --secondary: 44 44 46;
+    --secondary-foreground: 255 255 255;
+    --muted: 44 44 46;
+    --muted-foreground: 152 152 157;
+    --destructive: 255 69 58;
+    --destructive-foreground: 0 0 0;
+    --border: 56 56 58;
+    --input: 44 44 46;
+  }
+}
+
+/* react-native-web lets Text flex-shrink (native Yoga does not), so a one-line
+   tab label in the fixed-height tab item gets squeezed and clips its glyphs. */
+[role="tablist"] [role="tab"] > div[dir] {
+  flex-shrink: 0;
+}
