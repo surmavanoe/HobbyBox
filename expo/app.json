@@ -1,13 +1,17 @@
 {
   "expo": {
-    "name": "Mobile App Builder",
+    "name": "Hobbybox",
     "slug": "p780deb0afb64465797244c3aef43bf15",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "scheme": "p780deb0afb64465797244c3aef43bf15",
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
       "supportsTablet": true,
       "requireFullScreen": true,
@@ -15,7 +19,8 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "backgroundColor": "#0A0E17"
     },
     "plugins": [
       "expo-router",
@@ -25,6 +30,7 @@
     ],
     "android": {
       "package": "app.lovable.p780deb0afb64465797244c3aef43bf15"
-    }
+    },
+    "backgroundColor": "#0A0E17"
   }
 }
