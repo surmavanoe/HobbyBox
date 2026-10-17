@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { FlatList, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,7 +14,11 @@ export default function Friends() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
   const { openDetail, watchlist, toggleWatchlist } = useStore();
-  const [who, setWho] = useState<string>("all");
+  const params = useLocalSearchParams<{ who?: string }>();
+  const [who, setWho] = useState<string>(params.who ?? "all");
+  useEffect(() => {
+    if (params.who) setWho(params.who);
+  }, [params.who]);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const data = FRIEND_LOGS.filter((l) => who === "all" || l.userId === who).sort((a, b) => b.createdAt - a.createdAt);
 

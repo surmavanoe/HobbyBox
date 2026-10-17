@@ -6,7 +6,7 @@ import { FlatList, Image, Modal, Pressable, ScrollView, Text, View, useWindowDim
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cover, ORANGE, Stars } from "@/components/hb";
-import { CATEGORIES, categoryEmoji, categoryLabel, mediaById, type Category } from "@/lib/data";
+import { CATEGORIES, FRIENDS, categoryEmoji, categoryLabel, mediaById, type Category } from "@/lib/data";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
@@ -111,17 +111,24 @@ export default function Profile() {
               <Ionicons name="settings-outline" size={22} color="#fff" />
             </Pressable>
           </View>
+          <View className="absolute bottom-2" style={{ left: 16 + 92 + 12, right: 16 }}>
+            <Text
+              className="text-lg font-black tracking-widest text-white"
+              style={{ textShadowColor: "rgba(0,0,0,0.85)", textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 6 }}
+            >
+              {username.slice(0, split).toUpperCase()}
+              <Text className="text-primary">{username.slice(split).toUpperCase()}</Text>
+            </Text>
+          </View>
         </View>
         <View className="flex-row items-end px-4" style={{ marginTop: -44 }}>
           <View style={{ width: 92, height: 92, borderRadius: 46, borderWidth: 3, borderColor: ORANGE, overflow: "hidden", shadowColor: ORANGE, shadowOpacity: 0.9, shadowRadius: 14, shadowOffset: { width: 0, height: 0 } }} className="bg-card">
             <Image source={{ uri: ME_AVATAR }} style={{ width: "100%", height: "100%" }} />
           </View>
-          <View className="mb-[38px] ml-3 rounded-full border border-border bg-background/90 px-4 py-1.5">
-            <Text className="text-base font-black tracking-widest text-foreground">
-              {username.slice(0, split).toUpperCase()}
-              <Text className="text-primary">{username.slice(split).toUpperCase()}</Text>
-            </Text>
-          </View>
+          <Pressable onPress={() => router.push("/friends-list")} className="ml-3 min-h-[44px] flex-row items-center gap-1.5" accessibilityLabel={`Friends, ${FRIENDS.length}`}>
+            <Text className="text-base font-semibold text-foreground">Friends</Text>
+            <Text className="text-base font-bold text-primary">{FRIENDS.length}</Text>
+          </Pressable>
         </View>
         {!account ? (
           <Pressable onPress={() => router.push("/auth")} className="mx-4 mt-3 min-h-[44px] flex-row items-center rounded-2xl border border-border bg-card px-4">
@@ -130,7 +137,7 @@ export default function Profile() {
           </Pressable>
         ) : null}
 
-        <Text className="mt-6 text-center text-base font-bold tracking-widest text-primary">Quintuple</Text>
+        <Text className="mt-2 text-center text-base font-bold tracking-widest text-primary">Quintuple</Text>
         <View className="items-center">
           <Pentagon size={pentSize} onSlot={setSwap} />
         </View>
