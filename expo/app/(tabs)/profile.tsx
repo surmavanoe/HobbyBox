@@ -60,9 +60,6 @@ function Pentagon({ size, onSlot }: { size: number; onSlot: (c: Category) => voi
             style={{ position: "absolute", left: p.x - cw / 2, top: p.y - ch / 2, width: cw, height: ch }}
           >
             {m ? <Cover media={m} className="h-full w-full border-primary" rounded="rounded-lg" /> : <View className="h-full w-full rounded-lg border border-dashed border-primary bg-card" />}
-            <View
-              style={{ position: "absolute", left: cw / 2 - 5, top: ch / 2 - 5, width: 10, height: 10, borderRadius: 5, backgroundColor: ORANGE, opacity: 0 }}
-            />
             <View className="absolute -bottom-2 self-center rounded-full bg-background px-1.5">
               <Text className="text-[10px]">{categoryEmoji(cat)}</Text>
             </View>
@@ -73,7 +70,7 @@ function Pentagon({ size, onSlot }: { size: number; onSlot: (c: Category) => voi
         <View
           key={`d${i}`}
           pointerEvents="none"
-          style={{ position: "absolute", left: p.x - cw / 2 - 5, top: p.y - ch / 2 - 5, width: 10, height: 10, borderRadius: 5, backgroundColor: ORANGE, shadowColor: ORANGE, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } }}
+          style={{ position: "absolute", left: p.x - 5, top: p.y - ch / 2 - 5, width: 10, height: 10, borderRadius: 5, backgroundColor: ORANGE, shadowColor: ORANGE, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } }}
         />
       ))}
     </View>
