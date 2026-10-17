@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 export default function Friends() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { openLog } = useStore();
+  const { openDetail, watchlist, toggleWatchlist } = useStore();
   const [who, setWho] = useState<string>("all");
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const data = FRIEND_LOGS.filter((l) => who === "all" || l.userId === who).sort((a, b) => b.createdAt - a.createdAt);
@@ -62,7 +62,7 @@ export default function Friends() {
                   <Text className="text-xs text-muted-foreground">{timeAgo(item.createdAt)}</Text>
                 </View>
               </View>
-              <Pressable onPress={() => openLog(m.id)} className="mt-3 flex-row gap-3">
+              <Pressable onPress={() => openDetail(m.id)} className="mt-3 flex-row gap-3">
                 <Cover media={m} className="h-[105px] w-[70px]" rounded="rounded-lg" />
                 <View className="flex-1">
                   <Stars value={item.rating} size={14} />
@@ -78,9 +78,9 @@ export default function Friends() {
                   <Ionicons name={isLiked ? "heart" : "heart-outline"} size={20} color={isLiked ? colors.primary : colors.mutedForeground} />
                   <Text className="text-sm text-muted-foreground">{item.likes + (isLiked ? 1 : 0)}</Text>
                 </Pressable>
-                <Pressable onPress={() => openLog(m.id)} className="min-h-[44px] flex-row items-center gap-1">
-                  <Ionicons name="add-circle-outline" size={20} color={colors.mutedForeground} />
-                  <Text className="text-sm text-muted-foreground">Log it too</Text>
+                <Pressable onPress={() => toggleWatchlist(m.id)} className="min-h-[44px] flex-row items-center gap-1">
+                  <Ionicons name={watchlist.includes(m.id) ? "bookmark" : "bookmark-outline"} size={20} color={watchlist.includes(m.id) ? colors.primary : colors.mutedForeground} />
+                  <Text className={cn("text-sm", watchlist.includes(m.id) ? "text-primary" : "text-muted-foreground")}>{watchlist.includes(m.id) ? "In watchlist" : "Add to watchlist"}</Text>
                 </Pressable>
               </View>
             </View>

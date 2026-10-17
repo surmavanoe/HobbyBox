@@ -81,7 +81,7 @@ export default function Profile() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
   const { width, height } = useWindowDimensions();
-  const { myLogs, account, setFavorite, openLog, favorites } = useStore();
+  const { myLogs, account, setFavorite, openLog, favorites, watchlist, openDetail } = useStore();
   const [swap, setSwap] = useState<Category | null>(null);
   const bannerH = Math.round(height * 0.28);
   const pentSize = Math.min(width - 32, 360);
@@ -146,6 +146,36 @@ export default function Profile() {
                   <Cover media={m} className="h-full w-full" />
                   <View className="absolute bottom-0 left-0 right-0 items-center rounded-b-xl bg-black/70 py-1.5">
                     <Stars value={item.rating} size={12} />
+                  </View>
+                </Pressable>
+              );
+            }}
+          />
+        )}
+
+        <Text className="mt-8 px-4 text-base font-bold text-foreground">Watchlist:</Text>
+        {watchlist.length === 0 ? (
+          <View className="mx-4 mt-2 rounded-2xl border border-border bg-card p-4">
+            <Text className="text-muted-foreground">Titles you bookmark will show up here.</Text>
+            <Pressable onPress={() => router.push("/friends")} className="mt-2 min-h-[44px] justify-center self-start">
+              <Text className="font-semibold text-primary">Browse friends' activity</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <FlatList
+            horizontal
+            data={watchlist}
+            keyExtractor={(id) => id}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingTop: 10 }}
+            renderItem={({ item }) => {
+              const m = mediaById(item);
+              if (!m) return null;
+              return (
+                <Pressable onPress={() => openDetail(m.id)} className="h-[165px] w-[110px]">
+                  <Cover media={m} className="h-full w-full" />
+                  <View className="absolute right-1.5 top-1.5 rounded-full bg-black/70 p-1">
+                    <Ionicons name="bookmark" size={14} color={ORANGE} />
                   </View>
                 </Pressable>
               );
