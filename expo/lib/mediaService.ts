@@ -1,17 +1,27 @@
-// Media service: local catalog first, with optional live public endpoints.
-// Jikan (anime/manga) and OpenLibrary (books) are keyless. TMDB (films/TV) needs a key,
-// which must live on a server — so films/TV stay on the local catalog until a backend is added.
+// Public catalog reads use the connected project's read-only Data API.
+// No session or secret credentials are required to browse media.
 import { MEDIA, type Category, type Media } from "./data";
+import { filterCatalog, mapCatalogRow, type CatalogRow } from "./catalog";
 
-export function searchLocal(query: string, category?: Category | "all"): Media[] {
-  const q = query.trim().toLowerCase();
-  return MEDIA.filter((m) => (category && category !== "all" ? m.category === category : true)).filter((m) =>
-    !q
-      ? true
-      : m.title.toLowerCase().includes(q) ||
-        m.creator.toLowerCase().includes(q) ||
-        m.genres.some((g) => g.includes(q)),
-  );
+const CATALOG_URL = "https://smeucssdhwbfoiaethcm.supabase.co/rest/v1/media_items";
+const PUBLISHABLE_KEY = "sb_publishable_wJWtDTdhQaepebA_4SBC3Q_NEzL0wwV";
+
+export async function fetchCatalog(): Promise<Media[]> {
+  const items: Media[] = [];
+  const pageSize = 500;
+  for (let offset = 0; ; offset += pageSize) {
+    const response = await fetch(`${CATALOG_URL}?select=id,title,format,synopsis,external_id&order=title.asc,id.asc&offset=${offset}&limit=${pageSize}`, {
+      headers: { apikey: PUBLISHABLE_KEY },
+    });
+    if (!response.ok) throw new Error("Catalog unavailable");
+    const rows: CatalogRow[] = await response.json();
+    items.push(...rows.map(mapCatalogRow));
+    if (rows.length < pageSize) return items;
+  }
+}
+
+export function searchLocal(query: string, category: Category | "all" = "all", catalog: Media[] = MEDIA): Media[] {
+  return filterCatalog(catalog, query, category);
 }
 
 export async function searchJikan(query: string, kind: "anime" | "manga"): Promise<Media[]> {
@@ -83,17 +93,17 @@ export interface AiResult {
   results: Media[];
 }
 
-export async function aiDiscover(prompt: string, category: Category | "all" = "all"): Promise<AiResult> {
+export async function aiDiscover(prompt: string, category: Category | "all" = "all", catalog: Media[] = MEDIA): Promise<AiResult> {
   const p = prompt.toLowerCase();
   const wantedCats = (Object.keys(CAT_WORDS) as Category[]).filter((c) => CAT_WORDS[c].some((w) => p.includes(w)));
   const tags = Object.entries(KEYWORDS)
     .filter(([, words]) => words.some((w) => p.includes(w)))
     .map(([t]) => t);
-  const like = MEDIA.find((m) => p.includes(m.title.toLowerCase().split(":")[0]));
+  const like = catalog.find((m) => p.includes(m.title.toLowerCase().split(":")[0]));
   const likeTags = like ? like.genres : [];
   const allTags = [...new Set([...tags, ...likeTags])];
 
-  const scored = MEDIA.filter((m) => m.id !== like?.id)
+  const scored = catalog.filter((m) => m.id !== like?.id)
     .filter((m) => (category !== "all" ? m.category === category : wantedCats.length ? wantedCats.includes(m.category) : true))
     .map((m) => {
       const overlap = m.genres.filter((g) => allTags.includes(g)).length;

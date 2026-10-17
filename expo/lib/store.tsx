@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { DEFAULT_FAVORITES, MY_SEED_LOGS, type Category, type Log } from "./data";
+import { DEFAULT_FAVORITES, MY_SEED_LOGS, setDatabaseCatalog, type Category, type Log, type Media } from "./data";
+import { fetchCatalog } from "./mediaService";
 
 interface Account {
   email: string;
@@ -9,6 +10,10 @@ interface Account {
 }
 
 interface StoreValue {
+  catalog: Media[];
+  catalogLoading: boolean;
+  catalogError: boolean;
+  reloadCatalog: () => Promise<void>;
   ready: boolean;
   account: Account | null;
   myLogs: Log[];
@@ -32,6 +37,23 @@ const Ctx = createContext<StoreValue | null>(null);
 const KEY = "hobbybox:v1";
 
 export function StoreProvider({ children }: { children: ReactNode }) {
+  const [catalog, setCatalog] = useState<Media[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState(false);
+  const reloadCatalog = useCallback(async () => {
+    setCatalogLoading(true);
+    setCatalogError(false);
+    try {
+      const items = await fetchCatalog();
+      setDatabaseCatalog(items);
+      setCatalog(items);
+    } catch {
+      setCatalogError(true);
+    } finally {
+      setCatalogLoading(false);
+    }
+  }, []);
+  useEffect(() => { void reloadCatalog(); }, [reloadCatalog]);
   const [ready, setReady] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
   const [myLogs, setMyLogs] = useState<Log[]>(MY_SEED_LOGS);
@@ -65,6 +87,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<StoreValue>(
     () => ({
+      catalog,
+      catalogLoading,
+      catalogError,
+      reloadCatalog,
       ready,
       account,
       myLogs,
@@ -88,7 +114,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       openDetail: (id) => setDetailId(id),
       closeDetail: () => setDetailId(null),
     }),
-    [ready, account, myLogs, favorites, addLog, logModal, watchlist, detailId],
+    [catalog, catalogLoading, catalogError, reloadCatalog, ready, account, myLogs, favorites, addLog, logModal, watchlist, detailId],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

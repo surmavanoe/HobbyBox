@@ -4,13 +4,14 @@ import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, Switch, Tex
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryPills, Cover, StarPicker, type Filter } from "@/components/hb";
+import { CatalogStatus } from "@/components/CatalogStatus";
 import { categoryLabel, mediaById, type Media } from "@/lib/data";
 import { searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
 export function LogModal() {
-  const { logModal, closeLog, addLog } = useStore();
+  const { logModal, closeLog, addLog, catalog, catalogLoading, catalogError } = useStore();
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
   const [selected, setSelected] = useState<Media | undefined>();
@@ -33,7 +34,7 @@ export function LogModal() {
     }
   }, [logModal.open, logModal.mediaId]);
 
-  const results = useMemo(() => searchLocal(query, cat), [query, cat]);
+  const results = useMemo(() => searchLocal(query, cat, catalog), [query, cat, catalog]);
   const reLabel = selected && (selected.category === "book" || selected.category === "manga") ? "Re-read" : "Re-watch";
 
   const save = () => {
@@ -77,9 +78,10 @@ export function LogModal() {
                       />
                     </View>
                     <CategoryPills value={cat} onChange={setCat} />
+                    <CatalogStatus />
                   </View>
                 }
-                ListEmptyComponent={<Text className="px-4 text-muted-foreground">No titles match that search yet.</Text>}
+                ListEmptyComponent={catalogLoading || catalogError ? null : <Text className="px-4 text-muted-foreground">No titles match that search yet.</Text>}
                 renderItem={({ item }) => (
                   <Pressable onPress={() => setSelected(item)} className="min-h-[44px] flex-row items-center gap-3 px-4 py-2 active:bg-card">
                     <Cover media={item} className="h-[66px] w-[44px]" rounded="rounded-md" />
