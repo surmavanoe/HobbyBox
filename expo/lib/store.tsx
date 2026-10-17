@@ -21,6 +21,11 @@ interface StoreValue {
   logModal: { open: boolean; mediaId?: string };
   openLog: (mediaId?: string) => void;
   closeLog: () => void;
+  watchlist: string[];
+  toggleWatchlist: (mediaId: string) => void;
+  detailId: string | null;
+  openDetail: (mediaId: string) => void;
+  closeDetail: () => void;
 }
 
 const Ctx = createContext<StoreValue | null>(null);
@@ -31,6 +36,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<Account | null>(null);
   const [myLogs, setMyLogs] = useState<Log[]>(MY_SEED_LOGS);
   const [favorites, setFavorites] = useState<Record<Category, string>>(DEFAULT_FAVORITES);
+  const [watchlist, setWatchlist] = useState<string[]>([]);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [logModal, setLogModal] = useState<{ open: boolean; mediaId?: string }>({ open: false });
 
   useEffect(() => {
@@ -40,6 +47,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const s = JSON.parse(raw);
         if (s.account !== undefined) setAccount(s.account);
         if (Array.isArray(s.myLogs)) setMyLogs(s.myLogs);
+        if (Array.isArray(s.watchlist)) setWatchlist(s.watchlist);
         if (s.favorites) setFavorites({ ...DEFAULT_FAVORITES, ...s.favorites });
       })
       .catch(() => {})
@@ -48,8 +56,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    AsyncStorage.setItem(KEY, JSON.stringify({ account, myLogs, favorites })).catch(() => {});
-  }, [ready, account, myLogs, favorites]);
+    AsyncStorage.setItem(KEY, JSON.stringify({ account, myLogs, favorites, watchlist })).catch(() => {});
+  }, [ready, account, myLogs, favorites, watchlist]);
 
   const addLog = useCallback<StoreValue["addLog"]>((l) => {
     setMyLogs((prev) => [{ ...l, id: `me-${Date.now()}`, userId: "me", createdAt: Date.now(), likes: 0 }, ...prev]);
@@ -69,12 +77,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setAccount(null);
         setMyLogs(MY_SEED_LOGS);
         setFavorites(DEFAULT_FAVORITES);
+        setWatchlist([]);
       },
       logModal,
       openLog: (mediaId) => setLogModal({ open: true, mediaId }),
       closeLog: () => setLogModal({ open: false }),
+      watchlist,
+      toggleWatchlist: (id) => setWatchlist((w) => (w.includes(id) ? w.filter((x) => x !== id) : [id, ...w])),
+      detailId,
+      openDetail: (id) => setDetailId(id),
+      closeDetail: () => setDetailId(null),
     }),
-    [ready, account, myLogs, favorites, addLog, logModal],
+    [ready, account, myLogs, favorites, addLog, logModal, watchlist, detailId],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

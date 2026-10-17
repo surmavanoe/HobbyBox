@@ -8,8 +8,9 @@ import { FRIEND_LOGS, categoryEmoji, categoryLabel, friendById, type Media } fro
 import { aiDiscover, searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
-const SUGGESTIONS = ["Something cozy like Frieren", "A dark mind-bending sci-fi series", "Short emotional books for a weekend", "Epic fantasy manga"];
+const SUGGESTIONS = ["Show me what my friends watched this week", "Something cozy like Frieren", "A dark mind-bending sci-fi series", "Short emotional books for a weekend", "Epic fantasy manga my friends rated highly"];
 
 function friendContext(id: string) {
   const l = FRIEND_LOGS.filter((x) => x.mediaId === id).sort((a, b) => b.rating - a.rating)[0];
@@ -19,7 +20,9 @@ function friendContext(id: string) {
 export default function Search() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { openLog } = useStore();
+  const { openDetail } = useStore();
+  const [aiOn, setAiOn] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>("all");
   const [mode, setMode] = useState<"browse" | "ai">("browse");
@@ -43,7 +46,7 @@ export default function Search() {
     }
   };
 
-  const data = mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : searchLocal(query, cat);
+  const data = mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query ? searchLocal(query, cat) : [];
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -52,44 +55,45 @@ export default function Search() {
           data={data}
           keyExtractor={(m) => m.id}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 24, gap: 12 }}
+          contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 96, gap: 12 }}
           ListHeaderComponent={
             <View className="gap-3">
-              <Text className="px-4 text-2xl font-bold text-foreground">
-                Discover <Text className="text-primary">anything</Text>
-              </Text>
+              <View className="flex-row items-center px-4">
+                <Text className="flex-1 text-2xl font-bold text-foreground">
+                  Search & <Text className="text-primary">AI assist</Text>
+                </Text>
+                <Pressable onPress={() => setShowFilters((v) => !v)} className={cn("h-[44px] w-[44px] items-center justify-center rounded-full border", showFilters || cat !== "all" ? "border-primary bg-primary/15" : "border-border bg-card")} accessibilityLabel="Filters">
+                  <Ionicons name="options-outline" size={22} color={showFilters || cat !== "all" ? colors.primary : colors.foreground} />
+                </Pressable>
+              </View>
               <View className="mx-4 min-h-[48px] flex-row items-center rounded-full border border-border bg-card pl-4 pr-1">
-                <Ionicons name="sparkles" size={18} color={colors.primary} />
+                <Ionicons name="search" size={18} color={colors.mutedForeground} />
                 <TextInput
                   value={query}
                   onChangeText={(t) => {
                     setQuery(t);
                     if (mode === "ai") setMode("browse");
                   }}
-                  onSubmitEditing={() => runAi(query)}
+                  onSubmitEditing={() => (aiOn ? runAi(query) : undefined)}
                   returnKeyType="search"
-                  placeholder="Search or describe what you're in the mood for"
+                  placeholder={aiOn ? "Ask the AI anything..." : "Search..."}
                   placeholderTextColor={colors.mutedForeground}
                   className="ml-2 flex-1 py-3 text-base text-foreground"
                 />
-                <Pressable onPress={() => runAi(query)} className="h-[44px] w-[44px] items-center justify-center rounded-full bg-primary" accessibilityLabel="Ask AI">
-                  <Ionicons name="arrow-forward" size={20} color={colors.primaryForeground} />
+                <Pressable onPress={() => setAiOn((v) => !v)} className="min-h-[44px] items-center justify-center" accessibilityLabel={aiOn ? "Turn AI off" : "Turn AI on"}>
+                  <View className={cn("rounded-full border border-primary px-3 py-1.5", aiOn ? "bg-primary" : "bg-transparent")}>
+                    <Text className={cn("text-sm font-bold", aiOn ? "text-primary-foreground" : "text-primary")}>AI</Text>
+                  </View>
                 </Pressable>
               </View>
-              <CategoryPills value={cat} onChange={setCat} />
+              {showFilters ? <CategoryPills value={cat} onChange={setCat} /> : null}
               {mode === "browse" && !query ? (
-                <View className="mx-4 rounded-2xl border border-border bg-card p-4">
-                  <Text className="font-bold text-foreground">🤖 Ask the Hobbybox assistant</Text>
-                  <Text className="mt-1 text-sm text-muted-foreground">Describe a vibe, a mood or a title you loved.</Text>
-                  <View className="mt-2 flex-row flex-wrap gap-2">
-                    {SUGGESTIONS.map((s) => (
-                      <Pressable key={s} onPress={() => { setQuery(s); runAi(s); }} className="min-h-[44px] justify-center">
-                        <View className="rounded-full border border-primary px-3 py-1.5">
-                          <Text className="text-xs font-semibold text-primary">{s}</Text>
-                        </View>
-                      </Pressable>
-                    ))}
-                  </View>
+                <View className="gap-1 px-4 pt-2">
+                  {SUGGESTIONS.map((s) => (
+                    <Pressable key={s} onPress={() => { setQuery(s); setAiOn(true); runAi(s); }} className="min-h-[44px] justify-center active:opacity-100">
+                      <Text className="text-base font-semibold text-primary opacity-60">“{s}”</Text>
+                    </Pressable>
+                  ))}
                 </View>
               ) : null}
               {mode === "ai" && loading ? (
@@ -119,7 +123,7 @@ export default function Search() {
             </View>
           }
           ListEmptyComponent={
-            loading || error ? null : (
+            loading || error || (mode === "browse" && !query) ? null : (
               <View className="mx-4 rounded-2xl border border-border bg-card p-4">
                 <Text className="text-muted-foreground">No matches yet — try describing it to the assistant.</Text>
                 <Pressable onPress={() => runAi(query || "something great")} className="mt-2 min-h-[44px] justify-center self-start">
@@ -131,7 +135,7 @@ export default function Search() {
           renderItem={({ item }) => {
             const fc = friendContext(item.id);
             return (
-              <Pressable onPress={() => openLog(item.id)} className="mx-4 flex-row gap-3 rounded-2xl border border-border bg-card p-3 active:opacity-80">
+              <Pressable onPress={() => openDetail(item.id)} className="mx-4 flex-row gap-3 rounded-2xl border border-border bg-card p-3 active:opacity-80">
                 <Cover media={item} className="h-[120px] w-[80px]" rounded="rounded-lg" />
                 <View className="flex-1">
                   <Text className="text-base font-bold text-foreground">{item.title}</Text>
@@ -157,6 +161,14 @@ export default function Search() {
             );
           }}
         />
+        <Pressable
+          onPress={() => { setAiOn(true); runAi(query || SUGGESTIONS[0]); }}
+          className="absolute right-4 h-[60px] w-[60px] items-center justify-center rounded-full bg-primary active:opacity-90"
+          style={{ bottom: 16, shadowColor: "#000", shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
+          accessibilityLabel="Ask the AI assistant"
+        >
+          <Text className="text-lg font-black text-primary-foreground">AI</Text>
+        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );

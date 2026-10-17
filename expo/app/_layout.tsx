@@ -8,6 +8,7 @@ import { useLayoutEffect } from "react";
 import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { DetailModal } from "../components/DetailModal";
 import { LogModal } from "../components/LogModal";
 import { LovablePreviewErrorReporter } from "../components/lovable-preview-error-reporter";
 import { LovablePreviewSafeArea } from "../components/lovable-preview-safe-area";
@@ -34,6 +35,7 @@ export default function RootLayout() {
                   <LovablePreviewTextSelection />
                   <StatusBar style="light" />
                   <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A0E17" } }} />
+                  <DetailModal />
                   <LogModal />
                 </StoreProvider>
               </ThemeProvider>
