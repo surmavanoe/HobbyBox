@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming, type SharedValue } from "react-native-reanimated";
 import { FlatList, Image, Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -13,66 +14,77 @@ const ME_AVATAR = "https://i.pravatar.cc/150?img=68";
 const BANNER = "https://is1-ssl.mzstatic.com/image/thumb/Video126/v4/d8/ab/12/d8ab1255-b426-228e-b0b9-bf9226f56b28/6a9bf4da-a829-4291-9c77-c26853dbb1b1_FBJ-S1-1_3000x3000_Season_Master_Key_Art.jpg/1200x600bb.jpg";
 const ORDER: Category[] = ["film", "tv", "anime", "manga", "book"];
 
-function Pentagon({ size, onSlot }: { size: number; onSlot: (c: Category) => void }) {
+const TURN_MS = 40000;
+
+function PentSlot({ i, cat, theta, cx, cy, R, cw, ch, onSlot }: { i: number; cat: Category; theta: SharedValue<number>; cx: number; cy: number; R: number; cw: number; ch: number; onSlot: (c: Category) => void }) {
   const { favorites } = useStore();
-  const cw = size * 0.2;
+  const m = mediaById(favorites[cat]);
+  const style = useAnimatedStyle(() => {
+    const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5 + theta.value;
+    const x = cx + R * Math.cos(a);
+    const y = cy + R * Math.sin(a);
+    const depth = (Math.sin(a) + 1) / 2; // 0 back (top) -> 1 front (bottom)
+    return {
+      left: x - cw / 2,
+      top: y - ch / 2,
+      zIndex: Math.round(depth * 100),
+      transform: [{ scale: 0.8 + depth * 0.35 }],
+    };
+  });
+  return (
+    <Animated.View style={[{ position: "absolute", width: cw, height: ch }, style]}>
+      <Pressable onPress={() => onSlot(cat)} accessibilityLabel={`Change favorite ${categoryLabel(cat)}`} className="h-full w-full">
+        {m ? <Cover media={m} className="h-full w-full border-primary" rounded="rounded-lg" /> : <View className="h-full w-full rounded-lg border border-primary bg-card" />}
+        <View className="absolute -bottom-2 self-center rounded-full bg-background px-1.5">
+          <Text className="text-[10px]">{categoryEmoji(cat)}</Text>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function Pentagon({ size, onSlot }: { size: number; onSlot: (c: Category) => void }) {
+  const cw = size * 0.3;
   const ch = cw * 1.5;
-  const R = size / 2 - ch / 2 - 4;
+  const R = size / 2 - ch / 2;
   const cx = size / 2;
-  const cy = size / 2 + 8;
+  const cy = size / 2;
+  const theta = useSharedValue(0);
+  useEffect(() => {
+    theta.value = withRepeat(withTiming(2 * Math.PI, { duration: TURN_MS, easing: Easing.linear }), -1, false);
+    return () => cancelAnimation(theta);
+  }, [theta]);
+  const outlineStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${theta.value}rad` }] }));
   const pts = ORDER.map((_, i) => {
     const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
     return { x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) };
   });
   return (
-    <View style={{ width: size, height: size + 16 }}>
-      {pts.map((p, i) => {
-        const q = pts[(i + 1) % 5];
-        const len = Math.hypot(q.x - p.x, q.y - p.y);
-        const ang = Math.atan2(q.y - p.y, q.x - p.x);
-        return (
-          <View
-            key={`l${i}`}
-            style={{
-              position: "absolute",
-              left: (p.x + q.x) / 2 - len / 2,
-              top: (p.y + q.y) / 2 - 1,
-              width: len,
-              height: 2,
-              backgroundColor: ORANGE,
-              transform: [{ rotate: `${ang}rad` }],
-              shadowColor: ORANGE,
-              shadowOpacity: 0.9,
-              shadowRadius: 6,
-              shadowOffset: { width: 0, height: 0 },
-            }}
-          />
-        );
-      })}
-      {pts.map((p, i) => {
-        const cat = ORDER[i];
-        const m = mediaById(favorites[cat]);
-        return (
-          <Pressable
-            key={cat}
-            onPress={() => onSlot(cat)}
-            accessibilityLabel={`Change favorite ${categoryLabel(cat)}`}
-            style={{ position: "absolute", left: p.x - cw / 2, top: p.y - ch / 2, width: cw, height: ch }}
-          >
-            {m ? <Cover media={m} className="h-full w-full border-primary" rounded="rounded-lg" /> : <View className="h-full w-full rounded-lg border border-primary bg-card" />}
-            <View className="absolute -bottom-2 self-center rounded-full bg-background px-1.5">
-              <Text className="text-[10px]">{categoryEmoji(cat)}</Text>
-            </View>
-          </Pressable>
-        );
-      })}
-      {pts.map((p, i) => (
-        <View
-          key={`d${i}`}
-          pointerEvents="none"
-          style={{ position: "absolute", left: p.x - 5, top: p.y - ch / 2 - 5, width: 10, height: 10, borderRadius: 5, backgroundColor: ORANGE, shadowColor: ORANGE, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } }}
-        />
-      ))}
+    <View style={{ width: size, height: size + ch * 0.2, paddingTop: ch * 0.1 }}>
+      <View style={{ width: size, height: size }}>
+        <Animated.View pointerEvents="none" style={[{ position: "absolute", left: 0, top: 0, width: size, height: size }, outlineStyle]}>
+          {pts.map((p, i) => {
+            const q = pts[(i + 1) % 5];
+            const len = Math.hypot(q.x - p.x, q.y - p.y);
+            const ang = Math.atan2(q.y - p.y, q.x - p.x);
+            return (
+              <View
+                key={`l${i}`}
+                style={{ position: "absolute", left: (p.x + q.x) / 2 - len / 2, top: (p.y + q.y) / 2 - 1, width: len, height: 2, backgroundColor: ORANGE, transform: [{ rotate: `${ang}rad` }], shadowColor: ORANGE, shadowOpacity: 0.9, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } }}
+              />
+            );
+          })}
+          {pts.map((p, i) => (
+            <View
+              key={`d${i}`}
+              style={{ position: "absolute", left: p.x - 5, top: p.y - 5, width: 10, height: 10, borderRadius: 5, backgroundColor: ORANGE, shadowColor: ORANGE, shadowOpacity: 1, shadowRadius: 6, shadowOffset: { width: 0, height: 0 } }}
+            />
+          ))}
+        </Animated.View>
+        {ORDER.map((cat, i) => (
+          <PentSlot key={cat} i={i} cat={cat} theta={theta} cx={cx} cy={cy} R={R} cw={cw} ch={ch} onSlot={onSlot} />
+        ))}
+      </View>
     </View>
   );
 }
@@ -156,7 +168,7 @@ export default function Profile() {
         <Text className="mt-8 px-4 text-base font-bold text-foreground">Watchlist:</Text>
         {watchlist.length === 0 ? (
           <View className="mx-4 mt-2 rounded-2xl border border-border bg-card p-4">
-            <Text className="text-muted-foreground">Titles you bookmark will show up here.</Text>
+            <Text className="text-muted-foreground">Titles you add to your watchlist will show up here.</Text>
             <Pressable onPress={() => router.push("/friends")} className="mt-2 min-h-[44px] justify-center self-start">
               <Text className="font-semibold text-primary">Browse friends' activity</Text>
             </Pressable>
@@ -175,7 +187,7 @@ export default function Profile() {
                 <Pressable onPress={() => openDetail(m.id)} className="h-[165px] w-[110px]">
                   <Cover media={m} className="h-full w-full" />
                   <View className="absolute right-1.5 top-1.5 rounded-full bg-black/70 p-1">
-                    <Ionicons name="bookmark" size={14} color={ORANGE} />
+                    <Ionicons name="time" size={14} color={ORANGE} />
                   </View>
                 </Pressable>
               );
