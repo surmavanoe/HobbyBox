@@ -81,20 +81,18 @@ export default function Search() {
                   placeholderTextColor={colors.mutedForeground}
                   className="ml-2 flex-1 py-3 text-base text-foreground"
                 />
-                <Pressable onPress={() => setAiOn((v) => !v)} className="min-h-[44px] items-center justify-center" accessibilityLabel={aiOn ? "Turn AI off" : "Turn AI on"}>
-                  <View className={cn("rounded-full border border-primary px-3 py-1.5", aiOn ? "bg-primary" : "bg-transparent")}>
-                    <Text className={cn("text-sm font-bold", aiOn ? "text-primary-foreground" : "text-primary")}>AI</Text>
-                  </View>
+                <Pressable onPress={() => setAiOn((v) => !v)} className="min-h-[44px] items-center justify-center px-3" accessibilityLabel={aiOn ? "Turn AI off" : "Turn AI on"}>
+                  <Text className={cn("text-base font-black tracking-wide", aiOn ? "text-primary" : "text-primary/50")}>AI</Text>
                 </Pressable>
               </View>
               {showFilters ? <CategoryPills value={cat} onChange={setCat} /> : null}
               <CatalogStatus />
               {mode === "browse" && query && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}</Text> : null}
               {mode === "browse" && !query ? (
-                <View className="gap-1 px-4 pt-2">
+                <View className="gap-2 px-4 pt-2">
                   {SUGGESTIONS.map((s) => (
-                    <Pressable key={s} onPress={() => { setQuery(s); setAiOn(true); runAi(s); }} className="min-h-[44px] justify-center active:opacity-100">
-                      <Text className="text-base font-semibold text-primary opacity-60">“{s}”</Text>
+                    <Pressable key={s} onPress={() => { setQuery(s); setAiOn(true); runAi(s); }} className="min-h-[44px] justify-center rounded-full bg-primary/15 px-4 active:bg-primary/25">
+                      <Text className="text-base font-semibold text-primary">“{s}”</Text>
                     </Pressable>
                   ))}
                 </View>
