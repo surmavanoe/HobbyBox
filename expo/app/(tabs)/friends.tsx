@@ -79,7 +79,7 @@ export default function Friends() {
                   <Text className="text-sm text-muted-foreground">{item.likes + (isLiked ? 1 : 0)}</Text>
                 </Pressable>
                 <Pressable onPress={() => toggleWatchlist(m.id)} className="min-h-[44px] flex-row items-center gap-1">
-                  <Ionicons name={watchlist.includes(m.id) ? "bookmark" : "bookmark-outline"} size={20} color={watchlist.includes(m.id) ? colors.primary : colors.mutedForeground} />
+                  <Ionicons name={watchlist.includes(m.id) ? "time" : "time-outline"} size={20} color={watchlist.includes(m.id) ? colors.primary : colors.mutedForeground} />
                   <Text className={cn("text-sm", watchlist.includes(m.id) ? "text-primary" : "text-muted-foreground")}>{watchlist.includes(m.id) ? "In watchlist" : "Add to watchlist"}</Text>
                 </Pressable>
               </View>

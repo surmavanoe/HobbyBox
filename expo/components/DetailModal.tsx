@@ -62,7 +62,7 @@ export function DetailModal() {
                 <Text className="text-base font-bold text-primary-foreground">Log & Review</Text>
               </Pressable>
               <Pressable onPress={() => toggleWatchlist(m.id)} className="mt-3 min-h-[48px] flex-row items-center justify-center gap-2 rounded-xl bg-primary/15">
-                <Ionicons name={saved ? "bookmark" : "bookmark-outline"} size={18} color={colors.primary} />
+                <Ionicons name={saved ? "time" : "time-outline"} size={18} color={colors.primary} />
                 <Text className="font-semibold text-primary">{saved ? "In your watchlist" : "Add to watchlist"}</Text>
               </Pressable>
             </ScrollView>

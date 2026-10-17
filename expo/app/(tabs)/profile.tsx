@@ -156,7 +156,7 @@ export default function Profile() {
         <Text className="mt-8 px-4 text-base font-bold text-foreground">Watchlist:</Text>
         {watchlist.length === 0 ? (
           <View className="mx-4 mt-2 rounded-2xl border border-border bg-card p-4">
-            <Text className="text-muted-foreground">Titles you bookmark will show up here.</Text>
+            <Text className="text-muted-foreground">Titles you add to your watchlist will show up here.</Text>
             <Pressable onPress={() => router.push("/friends")} className="mt-2 min-h-[44px] justify-center self-start">
               <Text className="font-semibold text-primary">Browse friends' activity</Text>
             </Pressable>
@@ -175,7 +175,7 @@ export default function Profile() {
                 <Pressable onPress={() => openDetail(m.id)} className="h-[165px] w-[110px]">
                   <Cover media={m} className="h-full w-full" />
                   <View className="absolute right-1.5 top-1.5 rounded-full bg-black/70 p-1">
-                    <Ionicons name="bookmark" size={14} color={ORANGE} />
+                    <Ionicons name="time" size={14} color={ORANGE} />
                   </View>
                 </Pressable>
               );
