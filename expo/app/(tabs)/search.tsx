@@ -1,13 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { CategoryPills, Cover, Stars, type Filter } from "@/components/hb";
+import { Cover, Stars } from "@/components/hb";
 import { CatalogStatus } from "@/components/CatalogStatus";
+import { SearchFilterModal } from "@/components/SearchFilterModal";
 import { FRIEND_LOGS, categoryEmoji, categoryLabel, friendById, type Media } from "@/lib/data";
 import { aiDiscover, searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
+import { applySearchFilters, EMPTY_SEARCH_FILTERS, type SearchFilters } from "@/lib/searchFilters";
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +27,7 @@ export default function Search() {
   const [aiOn, setAiOn] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState("");
-  const [cat, setCat] = useState<Filter>("all");
+  const [filters, setFilters] = useState<SearchFilters>({ ...EMPTY_SEARCH_FILTERS });
   const [mode, setMode] = useState<"browse" | "ai">("browse");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -39,7 +41,7 @@ export default function Search() {
     setLoading(true);
     setError(false);
     try {
-      setAi(await aiDiscover(prompt, cat, catalog));
+      setAi(await aiDiscover(prompt, "all", catalog));
     } catch {
       setError(true);
     } finally {
@@ -47,7 +49,9 @@ export default function Search() {
     }
   };
 
-  const data = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query ? searchLocal(query, cat, catalog) : [];
+  const hasFilters = filters.year !== null || filters.genre !== null || filters.ratingOrder !== null;
+  const source = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query || hasFilters ? searchLocal(query, "all", catalog) : [];
+  const data = applySearchFilters(source, filters);
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -63,8 +67,8 @@ export default function Search() {
                 <Text className="flex-1 text-2xl font-bold text-foreground">
                   Search & <Text className="text-primary">AI assist</Text>
                 </Text>
-                <Pressable onPress={() => setShowFilters((v) => !v)} className={cn("h-[44px] w-[44px] items-center justify-center rounded-full border", showFilters || cat !== "all" ? "border-primary bg-primary/15" : "border-border bg-card")} accessibilityLabel="Filters">
-                  <Ionicons name="options-outline" size={22} color={showFilters || cat !== "all" ? colors.primary : colors.foreground} />
+                <Pressable onPress={() => setShowFilters(true)} className={cn("h-[44px] w-[44px] items-center justify-center rounded-full border", hasFilters ? "border-primary bg-primary/15" : "border-border bg-card")} accessibilityLabel="Filters">
+                  <Ionicons name="options-outline" size={22} color={hasFilters ? colors.primary : colors.foreground} />
                 </Pressable>
               </View>
               <View className="mx-4 min-h-[48px] flex-row items-center rounded-full border border-border bg-card pl-4 pr-1">
@@ -75,23 +79,22 @@ export default function Search() {
                     setQuery(t);
                     if (mode === "ai") setMode("browse");
                   }}
-                  onSubmitEditing={() => (aiOn ? runAi(query) : undefined)}
                   returnKeyType="search"
-                  placeholder={aiOn ? "Ask the AI anything..." : "Search..."}
+                  placeholder="Search..."
                   placeholderTextColor={colors.mutedForeground}
                   className="ml-2 flex-1 py-3 text-base text-foreground"
                 />
-                <Pressable onPress={() => setAiOn((v) => !v)} className="min-h-[44px] items-center justify-center px-3" accessibilityLabel={aiOn ? "Turn AI off" : "Turn AI on"}>
-                  <Text className={cn("text-base font-black tracking-wide", aiOn ? "text-primary" : "text-primary/50")}>AI</Text>
-                </Pressable>
+                <View className="min-h-[44px] flex-row items-center gap-2 px-2">
+                  <Text className={cn("text-sm font-bold", aiOn ? "text-primary" : "text-muted-foreground")}>AI</Text>
+                  <Switch value={aiOn} onValueChange={setAiOn} accessibilityLabel="AI switch" trackColor={{ false: colors.muted, true: colors.primary }} thumbColor={colors.foreground} ios_backgroundColor={colors.muted} />
+                </View>
               </View>
-              {showFilters ? <CategoryPills value={cat} onChange={setCat} /> : null}
               <CatalogStatus />
-              {mode === "browse" && query && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}</Text> : null}
-              {mode === "browse" && !query ? (
+              {mode === "browse" && (query || hasFilters) && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}{filters.year ? ` · ${filters.year}` : ""}{filters.genre ? ` · ${filters.genre}` : ""}{filters.ratingOrder ? ` · ${filters.ratingOrder === "best" ? "Best to worst" : "Worst to best"}` : ""}</Text> : null}
+              {mode === "browse" && !query && !hasFilters ? (
                 <View className="gap-2 px-4 pt-2">
                   {SUGGESTIONS.map((s) => (
-                    <Pressable key={s} onPress={() => { setQuery(s); setAiOn(true); runAi(s); }} className="min-h-[44px] justify-center rounded-[10px] bg-primary/15 px-4 active:bg-primary/25">
+                    <Pressable key={s} onPress={() => { setQuery(s); runAi(s); }} className="min-h-[44px] justify-center rounded-[10px] bg-primary/15 px-4 active:bg-primary/25">
                       <Text className="text-base font-semibold text-primary">“{s}”</Text>
                     </Pressable>
                   ))}
@@ -124,11 +127,11 @@ export default function Search() {
             </View>
           }
           ListEmptyComponent={
-            catalogLoading || catalogError || loading || error || (mode === "browse" && !query) ? null : (
+            catalogLoading || catalogError || loading || error || (mode === "browse" && !query && !hasFilters) ? null : (
               <View className="mx-4 rounded-2xl border border-border bg-card p-4">
-                <Text className="text-muted-foreground">No matches yet — try describing it to the assistant.</Text>
-                <Pressable onPress={() => runAi(query || "something great")} className="mt-2 min-h-[44px] justify-center self-start">
-                  <Text className="font-semibold text-primary">Ask the assistant</Text>
+                  <Text className="text-muted-foreground">{hasFilters ? "No titles match these filters yet." : "No matches yet — try describing it to the assistant."}</Text>
+                  <Pressable onPress={() => hasFilters ? setFilters({ ...EMPTY_SEARCH_FILTERS }) : runAi(query || "something great")} className="mt-2 min-h-[44px] justify-center self-start">
+                    <Text className="font-semibold text-primary">{hasFilters ? "Clear filters" : "Ask the assistant"}</Text>
                 </Pressable>
               </View>
             )
@@ -163,13 +166,15 @@ export default function Search() {
           }}
         />
         <Pressable
-          onPress={() => { setAiOn(true); runAi(query || SUGGESTIONS[0]); }}
-          className="absolute right-4 h-[60px] w-[60px] items-center justify-center rounded-full bg-primary active:opacity-90"
-          style={{ bottom: 16, shadowColor: "#000", shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6 }}
-          accessibilityLabel="Ask the AI assistant"
+          disabled
+          className="absolute right-4 h-[72px] w-[72px] items-center justify-center rounded-full bg-primary"
+          style={{ bottom: 16 }}
+          accessibilityLabel="AI assistant"
+          accessibilityState={{ disabled: true }}
         >
-          <Text className="text-lg font-black text-primary-foreground">AI</Text>
+          <Text className="text-xl font-black text-primary-foreground">AI</Text>
         </Pressable>
+        <SearchFilterModal visible={showFilters} onClose={() => setShowFilters(false)} value={filters} onChange={setFilters} />
       </View>
     </KeyboardAvoidingView>
   );
