@@ -9,6 +9,9 @@ import { useStore } from "@/lib/store";
 
 const ME_AVATAR = "https://i.pravatar.cc/150?img=68";
 
+// Posters lift on hover (web) and press down when tapped.
+const lift = ({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => ({ transform: [{ scale: pressed ? 0.95 : hovered ? 1.05 : 1 }] });
+
 export default function Home() {
   const insets = useSafeAreaInsets();
   const { openDetail } = useStore();
@@ -70,7 +73,7 @@ export default function Home() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}
                 renderItem={({ item }) => (
-                  <Pressable onPress={() => openDetail(item.id)} className="w-[124px]">
+                  <Pressable onPress={() => openDetail(item.id)} className="w-[124px]" style={lift}>
                     <View style={{ transform: [{ perspective: 600 }, { rotateY: "-8deg" }] }}>
                       <Cover media={item} className="h-[180px] w-[124px]" />
                     </View>
@@ -94,7 +97,7 @@ export default function Home() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}
                 renderItem={({ item }) => (
-                  <Pressable onPress={() => openDetail(item.media.id)} className="w-[124px]">
+                  <Pressable onPress={() => openDetail(item.media.id)} className="w-[124px]" style={lift}>
                     <View>
                       <Cover media={item.media} className="h-[180px] w-[124px]" />
                       <View className="absolute left-2 top-2 flex-row">
@@ -123,7 +126,7 @@ export default function Home() {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}
                 renderItem={({ item }) => (
-                  <Pressable onPress={() => openDetail(item.id)} className="w-[140px]">
+                  <Pressable onPress={() => openDetail(item.id)} className="w-[140px]" style={lift}>
                     <View>
                       <Cover media={item} className="h-[200px] w-[140px]" />
                       <View className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1">
