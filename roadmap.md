@@ -11,3 +11,7 @@
 # Release-year range
 - [x] Replace decade/year lists with a non-crossing, integer-step 1940–2027 two-dot slider.
 - [x] Test year bounds, meeting behavior and inclusive filtering; verify dragging in Quick view.
+
+# Filter pop-up
+- [x] Replace the full-screen filter with a smaller overlay showing genre, the existing year slider, and ratings.
+- [x] Verify opening, applying, and dismissing the pop-up in Quick view.
