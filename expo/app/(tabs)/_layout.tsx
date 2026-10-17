@@ -29,9 +29,10 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
               <Pressable
                 onPress={() => openLog()}
                 accessibilityLabel="Log media"
-                className="h-[52px] w-[52px] items-center justify-center rounded-2xl bg-primary active:opacity-80"
+                className="h-[52px] w-[52px] items-center justify-center active:opacity-70"
               >
-                <Ionicons name="add" size={32} color={colors.primaryForeground} />
+                <View className="absolute h-[7px] w-[34px] rounded-[2px] bg-primary" />
+                <View className="absolute h-[34px] w-[7px] rounded-[2px] bg-primary" />
               </Pressable>
             </View>
           );

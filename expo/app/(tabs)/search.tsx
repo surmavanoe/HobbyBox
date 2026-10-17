@@ -91,7 +91,7 @@ export default function Search() {
               {mode === "browse" && !query ? (
                 <View className="gap-2 px-4 pt-2">
                   {SUGGESTIONS.map((s) => (
-                    <Pressable key={s} onPress={() => { setQuery(s); setAiOn(true); runAi(s); }} className="min-h-[44px] justify-center rounded-full bg-primary/15 px-4 active:bg-primary/25">
+                    <Pressable key={s} onPress={() => { setQuery(s); setAiOn(true); runAi(s); }} className="min-h-[44px] justify-center rounded-[10px] bg-primary/15 px-4 active:bg-primary/25">
                       <Text className="text-base font-semibold text-primary">“{s}”</Text>
                     </Pressable>
                   ))}
