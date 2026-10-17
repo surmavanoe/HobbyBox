@@ -26,8 +26,7 @@
       "expo-router",
       "expo-asset",
       "expo-status-bar",
-      "expo-web-browser",
-      "expo-secure-store"
+      "expo-web-browser"
     ],
     "android": {
       "package": "app.lovable.p780deb0afb64465797244c3aef43bf15"

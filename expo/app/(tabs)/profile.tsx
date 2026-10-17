@@ -59,7 +59,7 @@ function Pentagon({ size, onSlot }: { size: number; onSlot: (c: Category) => voi
             accessibilityLabel={`Change favorite ${categoryLabel(cat)}`}
             style={{ position: "absolute", left: p.x - cw / 2, top: p.y - ch / 2, width: cw, height: ch }}
           >
-            {m ? <Cover media={m} className="h-full w-full border-primary" rounded="rounded-lg" /> : <View className="h-full w-full rounded-lg border border-dashed border-primary bg-card" />}
+            {m ? <Cover media={m} className="h-full w-full border-primary" rounded="rounded-lg" /> : <View className="h-full w-full rounded-lg border border-primary bg-card" />}
             <View className="absolute -bottom-2 self-center rounded-full bg-background px-1.5">
               <Text className="text-[10px]">{categoryEmoji(cat)}</Text>
             </View>
