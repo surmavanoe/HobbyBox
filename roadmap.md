@@ -4,6 +4,6 @@
 - [x] Test all 60 titles and verify search-to-detail-to-watchlist in Quick view.
 
 # Search controls
-- [ ] Add nested release-year, genre and rating filters.
-- [ ] Make the AI switch visual-only and enlarge the inactive floating AI button.
-- [ ] Test filter rules and verify Search interactions in Quick view.
+- [x] Add nested release-year, genre and rating filters.
+- [x] Make the AI switch visual-only and enlarge the inactive floating AI button.
+- [x] Test filter rules and verify Search interactions in Quick view.
