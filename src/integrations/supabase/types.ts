@@ -19,21 +19,74 @@ export type Database = {
           created_at: string
           friend_id: string
           id: string
+          status: string
           user_id: string
         }
         Insert: {
           created_at?: string
           friend_id: string
           id?: string
+          status?: string
           user_id: string
         }
         Update: {
           created_at?: string
           friend_id?: string
           id?: string
+          status?: string
           user_id?: string
         }
         Relationships: []
+      }
+      library_entries: {
+        Row: {
+          completed_at: string | null
+          id: string
+          is_rewatch: boolean
+          media_item_id: string
+          progress: number | null
+          rating: number | null
+          review: string | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          is_rewatch?: boolean
+          media_item_id: string
+          progress?: number | null
+          rating?: number | null
+          review?: string | null
+          started_at?: string | null
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          is_rewatch?: boolean
+          media_item_id?: string
+          progress?: number | null
+          rating?: number | null
+          review?: string | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "library_entries_media_item_id_fkey"
+            columns: ["media_item_id"]
+            isOneToOne: false
+            referencedRelation: "media_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       media_embeddings: {
         Row: {
@@ -63,28 +116,85 @@ export type Database = {
       }
       media_items: {
         Row: {
+          average_rating: number | null
           created_at: string
+          episode_count: number | null
           external_id: string | null
+          external_source: string | null
+          external_url: string | null
           format: string
+          genres: string[] | null
           id: string
+          issue_count: number | null
+          metadata: Json
+          page_count: number | null
+          poster_url: string | null
+          release_year: number | null
+          runtime_minutes: number | null
           synopsis: string | null
           title: string
         }
         Insert: {
+          average_rating?: number | null
           created_at?: string
+          episode_count?: number | null
           external_id?: string | null
+          external_source?: string | null
+          external_url?: string | null
           format: string
+          genres?: string[] | null
           id?: string
+          issue_count?: number | null
+          metadata?: Json
+          page_count?: number | null
+          poster_url?: string | null
+          release_year?: number | null
+          runtime_minutes?: number | null
           synopsis?: string | null
           title: string
         }
         Update: {
+          average_rating?: number | null
           created_at?: string
+          episode_count?: number | null
           external_id?: string | null
+          external_source?: string | null
+          external_url?: string | null
           format?: string
+          genres?: string[] | null
           id?: string
+          issue_count?: number | null
+          metadata?: Json
+          page_count?: number | null
+          poster_url?: string | null
+          release_year?: number | null
+          runtime_minutes?: number | null
           synopsis?: string | null
           title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          handle: string
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          handle: string
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          handle?: string
+          id?: string
         }
         Relationships: []
       }
@@ -93,25 +203,31 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
+          is_rewatch: boolean
           media_item_id: string | null
           rating: number | null
           user_id: string
+          visibility: string
         }
         Insert: {
           content?: string | null
           created_at?: string
           id?: string
+          is_rewatch?: boolean
           media_item_id?: string | null
           rating?: number | null
           user_id: string
+          visibility?: string
         }
         Update: {
           content?: string | null
           created_at?: string
           id?: string
+          is_rewatch?: boolean
           media_item_id?: string | null
           rating?: number | null
           user_id?: string
+          visibility?: string
         }
         Relationships: [
           {
