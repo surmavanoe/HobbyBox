@@ -1,18 +1,39 @@
 import { expect, test } from "bun:test";
 import { MEDIA } from "./data";
-import { applySearchFilters, EMPTY_SEARCH_FILTERS, RELEASE_DECADES, yearsInDecade } from "./searchFilters";
+import { applySearchFilters, EMPTY_SEARCH_FILTERS, MIN_RELEASE_YEAR, MAX_RELEASE_YEAR, moveYearHandle, formatYearRange } from "./searchFilters";
 
-test("release decades cover 1940s through 2020s", () => {
-  expect(RELEASE_DECADES).toEqual([1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020]);
+test("release range starts at 1940 and ends at 2027", () => {
+  expect([MIN_RELEASE_YEAR, MAX_RELEASE_YEAR]).toEqual([1940, 2027]);
+  expect(moveYearHandle([1940, 2027], 0, 1900)).toEqual([1940, 2027]);
+  expect(moveYearHandle([1940, 2027], 1, 2030)).toEqual([1940, 2027]);
 });
-test("1940s contains each numeral year from 1940 to 1949", () => {
-  expect(yearsInDecade(1940)).toEqual([1940, 1941, 1942, 1943, 1944, 1945, 1946, 1947, 1948, 1949]);
+test("every integer from 1940 through 2026 is selectable", () => {
+  for (let year = 1940; year <= 2026; year++) {
+    expect(moveYearHandle([1940, 2027], 0, year)).toEqual([year, 2027]);
+    expect(moveYearHandle([1940, 2027], 1, year)).toEqual([1940, year]);
+  }
+  expect(moveYearHandle([1940, 2027], 0, 2000.6)).toEqual([2001, 2027]);
+});
+test("neither dot can cross the other", () => {
+  expect(moveYearHandle([1990, 2000], 0, 2027)).toEqual([2000, 2000]);
+  expect(moveYearHandle([1990, 2000], 1, 1940)).toEqual([1990, 1990]);
+});
+test("meeting dots produce a single year and can separate again", () => {
+  expect(formatYearRange([2000, 2000])).toBe("2000");
+  expect(moveYearHandle([2000, 2000], 0, 1999)).toEqual([1999, 2000]);
+  expect(moveYearHandle([2000, 2000], 1, 2001)).toEqual([2000, 2001]);
 });
 test("specific release year excludes other and unknown years", () => {
   const base = MEDIA[0];
   if (!base) throw new Error("Missing test fixture");
   const items = [1940, 1949, 1950, 0].map((year) => ({ ...base, id: String(year), year }));
-  expect(applySearchFilters(items, { ...EMPTY_SEARCH_FILTERS, year: 1949 }).map((m) => m.year)).toEqual([1949]);
+  expect(applySearchFilters(items, { ...EMPTY_SEARCH_FILTERS, yearRange: [1949, 1949] }).map((m) => m.year)).toEqual([1949]);
+});
+test("range filtering includes both endpoint years", () => {
+  const base = MEDIA[0];
+  if (!base) throw new Error("Missing test fixture");
+  const items = [0, 1940, 1999, 2000, 2001, 2026, 2027].map((year) => ({ ...base, id: String(year), year }));
+  expect(applySearchFilters(items, { ...EMPTY_SEARCH_FILTERS, yearRange: [1999, 2001] }).map((m) => m.year)).toEqual([1999, 2000, 2001]);
 });
 test("genre selection filters matching film genres", () => {
   const base = MEDIA[0];

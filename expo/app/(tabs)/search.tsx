@@ -9,7 +9,7 @@ import { SearchFilterModal } from "@/components/SearchFilterModal";
 import { FRIEND_LOGS, categoryEmoji, categoryLabel, friendById, type Media } from "@/lib/data";
 import { aiDiscover, searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
-import { applySearchFilters, EMPTY_SEARCH_FILTERS, type SearchFilters } from "@/lib/searchFilters";
+import { applySearchFilters, EMPTY_SEARCH_FILTERS, formatYearRange, type SearchFilters } from "@/lib/searchFilters";
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -49,7 +49,7 @@ export default function Search() {
     }
   };
 
-  const hasFilters = filters.year !== null || filters.genre !== null || filters.ratingOrder !== null;
+  const hasFilters = filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
   const source = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query || hasFilters ? searchLocal(query, "all", catalog) : [];
   const data = applySearchFilters(source, filters);
 
@@ -90,7 +90,7 @@ export default function Search() {
                 </View>
               </View>
               <CatalogStatus />
-              {mode === "browse" && (query || hasFilters) && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}{filters.year ? ` · ${filters.year}` : ""}{filters.genre ? ` · ${filters.genre}` : ""}{filters.ratingOrder ? ` · ${filters.ratingOrder === "best" ? "Best to worst" : "Worst to best"}` : ""}</Text> : null}
+              {mode === "browse" && (query || hasFilters) && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}{filters.yearRange ? ` · ${formatYearRange(filters.yearRange)}` : ""}{filters.genre ? ` · ${filters.genre}` : ""}{filters.ratingOrder ? ` · ${filters.ratingOrder === "best" ? "Best to worst" : "Worst to best"}` : ""}</Text> : null}
               {mode === "browse" && !query && !hasFilters ? (
                 <View className="gap-2 px-4 pt-2">
                   {SUGGESTIONS.map((s) => (
