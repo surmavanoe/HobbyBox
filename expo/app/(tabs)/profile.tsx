@@ -5,7 +5,7 @@ import { FlatList, Image, Modal, Pressable, ScrollView, Text, View, useWindowDim
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cover, ORANGE, Stars } from "@/components/hb";
-import { CATEGORIES, MEDIA, categoryEmoji, categoryLabel, mediaById, type Category } from "@/lib/data";
+import { CATEGORIES, categoryEmoji, categoryLabel, mediaById, type Category } from "@/lib/data";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
@@ -81,7 +81,7 @@ export default function Profile() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
   const { width, height } = useWindowDimensions();
-  const { myLogs, account, setFavorite, openLog, favorites, watchlist, openDetail } = useStore();
+  const { myLogs, account, setFavorite, openLog, favorites, watchlist, openDetail, catalog } = useStore();
   const [swap, setSwap] = useState<Category | null>(null);
   const bannerH = Math.round(height * 0.28);
   const pentSize = Math.min(width - 32, 360);
@@ -189,14 +189,14 @@ export default function Profile() {
           <View className="max-h-[75%] rounded-t-3xl border-t border-border bg-background" style={{ paddingBottom: insets.bottom + 12 }}>
             <View className="flex-row items-center px-4 pt-2">
               <Text className="flex-1 text-lg font-bold text-foreground">
-                Favorite {swap ? CATEGORIES.find((c) => c.key === swap)!.plural : ""}
+                Favorite {swap ? CATEGORIES.find((c) => c.key === swap)?.plural : ""}
               </Text>
               <Pressable onPress={() => setSwap(null)} className="min-h-[44px] min-w-[44px] items-center justify-center" accessibilityLabel="Close">
                 <Ionicons name="close" size={24} color={colors.foreground} />
               </Pressable>
             </View>
             <FlatList
-              data={MEDIA.filter((m) => m.category === swap)}
+              data={catalog.filter((m) => m.category === swap)}
               keyExtractor={(m) => m.id}
               renderItem={({ item }) => {
                 const active = swap && favorites[swap] === item.id;

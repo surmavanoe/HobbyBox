@@ -32,11 +32,11 @@ export function DetailModal() {
                 <View className="flex-1">
                   <Text className="text-xl font-bold text-foreground">{m.title}</Text>
                   <Text className="mt-1 text-sm text-muted-foreground">
-                    {categoryLabel(m.category)} · {m.year}
+                    {categoryLabel(m.category)}{m.year ? ` · ${m.year}` : ""}
                   </Text>
-                  <View className="mt-2">
+                  {m.rating > 0 ? <View className="mt-2">
                     <Stars value={m.rating} size={14} />
-                  </View>
+                  </View> : null}
                   <View className="mt-3 flex-row flex-wrap gap-2">
                     {m.genres.map((g) => (
                       <View key={g} className="rounded-full border border-primary px-3 py-1">
@@ -46,10 +46,11 @@ export function DetailModal() {
                   </View>
                 </View>
               </View>
-              <Text className="mt-5 text-base text-foreground">{m.synopsis}</Text>
-              <Text className="mt-5 text-sm font-bold text-foreground">{isPrint ? "Author" : "Cast"}</Text>
-              <Text className="mt-1 text-sm text-muted-foreground">{isPrint ? m.creator : (CAST[m.id] ?? [m.creator]).join(", ")}</Text>
-              {!isPrint ? <Text className="mt-1 text-xs text-muted-foreground">Created by {m.creator}</Text> : null}
+              <Text className="mt-5 text-base text-foreground">{m.synopsis || "No description available yet."}</Text>
+              {m.creator || CAST[m.id] ? <>
+                <Text className="mt-5 text-sm font-bold text-foreground">{isPrint ? "Author" : CAST[m.id] ? "Cast" : "Creator"}</Text>
+                <Text className="mt-1 text-sm text-muted-foreground">{isPrint ? m.creator : (CAST[m.id] ?? [m.creator]).join(", ")}</Text>
+              </> : null}
 
               <Pressable
                 onPress={() => {

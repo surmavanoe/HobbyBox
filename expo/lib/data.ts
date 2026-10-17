@@ -83,7 +83,12 @@ export const MEDIA: Media[] = [
   { id: "b10", title: "The Name of the Wind", category: "book", year: 2007, creator: "Patrick Rothfuss", cover: c("B:The Name of the Wind"), rating: 4.5, genres: ["fantasy", "adventure", "epic", "music"], synopsis: "Kvothe recounts his journey from gifted child to legendary wizard.", logs: 950000 },
 ];
 
-export const mediaById = (id: string) => MEDIA.find((m) => m.id === id);
+let databaseCatalog: Media[] = [];
+export function setDatabaseCatalog(items: Media[]) {
+  databaseCatalog = items;
+}
+// Legacy demo IDs still resolve so saved logs and favorites are not lost.
+export const mediaById = (id: string) => databaseCatalog.find((m) => m.id === id) ?? MEDIA.find((m) => m.id === id);
 
 export interface Friend {
   id: string;

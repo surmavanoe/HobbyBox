@@ -4,6 +4,7 @@ import { FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, V
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryPills, Cover, Stars, type Filter } from "@/components/hb";
+import { CatalogStatus } from "@/components/CatalogStatus";
 import { FRIEND_LOGS, categoryEmoji, categoryLabel, friendById, type Media } from "@/lib/data";
 import { aiDiscover, searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
@@ -20,7 +21,7 @@ function friendContext(id: string) {
 export default function Search() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { openDetail } = useStore();
+  const { openDetail, catalog, catalogLoading, catalogError } = useStore();
   const [aiOn, setAiOn] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState("");
@@ -38,7 +39,7 @@ export default function Search() {
     setLoading(true);
     setError(false);
     try {
-      setAi(await aiDiscover(prompt, cat));
+      setAi(await aiDiscover(prompt, cat, catalog));
     } catch {
       setError(true);
     } finally {
@@ -46,7 +47,7 @@ export default function Search() {
     }
   };
 
-  const data = mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query ? searchLocal(query, cat) : [];
+  const data = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query ? searchLocal(query, cat, catalog) : [];
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
@@ -87,6 +88,8 @@ export default function Search() {
                 </Pressable>
               </View>
               {showFilters ? <CategoryPills value={cat} onChange={setCat} /> : null}
+              <CatalogStatus />
+              {mode === "browse" && query && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}</Text> : null}
               {mode === "browse" && !query ? (
                 <View className="gap-1 px-4 pt-2">
                   {SUGGESTIONS.map((s) => (
@@ -123,7 +126,7 @@ export default function Search() {
             </View>
           }
           ListEmptyComponent={
-            loading || error || (mode === "browse" && !query) ? null : (
+            catalogLoading || catalogError || loading || error || (mode === "browse" && !query) ? null : (
               <View className="mx-4 rounded-2xl border border-border bg-card p-4">
                 <Text className="text-muted-foreground">No matches yet — try describing it to the assistant.</Text>
                 <Pressable onPress={() => runAi(query || "something great")} className="mt-2 min-h-[44px] justify-center self-start">
@@ -145,7 +148,7 @@ export default function Search() {
                         {categoryEmoji(item.category)} {categoryLabel(item.category)}
                       </Text>
                     </View>
-                    <Text className="text-xs text-muted-foreground">{item.year}</Text>
+                    {item.year ? <Text className="text-xs text-muted-foreground">{item.year}</Text> : null}
                   </View>
                   <Text className="mt-1.5 text-xs text-muted-foreground" numberOfLines={3}>
                     {item.synopsis}
