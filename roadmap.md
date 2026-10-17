@@ -13,5 +13,5 @@
 - [x] Test year bounds, meeting behavior and inclusive filtering; verify dragging in Quick view.
 
 # Filter pop-up
-- [ ] Replace the full-screen filter with a smaller overlay showing genre, the existing year slider, and ratings.
-- [ ] Verify opening, applying, and dismissing the pop-up in Quick view.
+- [x] Replace the full-screen filter with a smaller overlay showing genre, the existing year slider, and ratings.
+- [x] Verify opening, applying, and dismissing the pop-up in Quick view.
