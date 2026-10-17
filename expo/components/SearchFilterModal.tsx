@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { FlatList, Modal, Pressable, Text, View } from "react-native";
+import { FlatList, Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/ui/Button";
@@ -8,6 +8,13 @@ import { EMPTY_SEARCH_FILTERS, FILM_GENRES, type SearchFilters } from "@/lib/sea
 import { YearRangeSlider } from "@/components/YearRangeSlider";
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+import type { Category } from "@/lib/data";
+
+const CATEGORIES: { key: Category | null; label: string }[] = [
+  { key: null, label: "All" }, { key: "film", label: "Films" },
+  { key: "anime", label: "Anime" }, { key: "tv", label: "Series" },
+  { key: "manga", label: "Manga / Comics" }, { key: "book", label: "Books" },
+];
 
 interface Props { visible: boolean; onClose: () => void; value: SearchFilters; onChange: (value: SearchFilters) => void }
 
@@ -26,10 +33,10 @@ export function SearchFilterModal({ visible, onClose, value, onChange }: Props) 
             <Text className="flex-1 text-2xl font-bold text-foreground">Filter Search & <Text className="text-primary">AI</Text></Text>
             <Pressable onPress={onClose} accessibilityLabel="Close filters" className="min-h-[44px] min-w-[44px] items-center justify-center"><Ionicons name="close-circle" size={28} color={colors.mutedForeground} /></Pressable>
           </View>
-          <FlatList data={["Genre", "Release Year", "Ratings"]} keyExtractor={(label) => label} contentContainerStyle={{ paddingLeft: insets.left + 20, paddingRight: insets.right + 20, paddingBottom: 16, gap: 20 }} renderItem={({ item }) => (
+          <FlatList data={["Category", "Genre", "Release Year", "Ratings"]} keyExtractor={(label) => label} contentContainerStyle={{ paddingLeft: insets.left + 20, paddingRight: insets.right + 20, paddingBottom: 16, gap: 12 }} renderItem={({ item }) => (
             <View>
               <Text className="mb-2 text-base font-semibold text-foreground">{item}</Text>
-              {item === "Genre" ? <View className="flex-row flex-wrap gap-2">{FILM_GENRES.map((genre) => <Button key={genre} variant={draft.genre === genre ? "tinted" : "ghost"} accessibilityState={{ selected: draft.genre === genre }} className={cn("min-h-[44px] rounded-full border px-3 py-2", draft.genre === genre ? "border-primary" : "border-border")} onPress={() => setDraft({ ...draft, genre: draft.genre === genre ? null : genre })}>{genre}</Button>)}</View> : item === "Release Year" ? <YearRangeSlider value={draft.yearRange} onChange={(yearRange) => setDraft({ ...draft, yearRange })} /> : <View className="gap-1">{(["best", "worst"] as const).map((order) => <Pressable key={order} accessibilityRole="button" accessibilityLabel={order === "best" ? "Best to worst" : "Worst to best"} accessibilityState={{ selected: draft.ratingOrder === order }} onPress={() => setDraft({ ...draft, ratingOrder: draft.ratingOrder === order ? null : order })} className={cn("min-h-[48px] flex-row items-center gap-2 rounded-lg px-2", draft.ratingOrder === order && "bg-primary/15")}>
+              {item === "Category" ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>{CATEGORIES.map(({ key, label }) => <Button key={label} variant={draft.category === key ? "tinted" : "ghost"} accessibilityState={{ selected: draft.category === key }} className={cn("min-h-[44px] rounded-full border px-3 py-2", draft.category === key ? "border-primary" : "border-border")} onPress={() => setDraft({ ...draft, category: key })}>{label}</Button>)}</ScrollView> : item === "Genre" ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>{FILM_GENRES.map((genre) => <Button key={genre} variant={draft.genre === genre ? "tinted" : "ghost"} accessibilityState={{ selected: draft.genre === genre }} className={cn("min-h-[44px] rounded-full border px-3 py-2", draft.genre === genre ? "border-primary" : "border-border")} onPress={() => setDraft({ ...draft, genre: draft.genre === genre ? null : genre })}>{genre}</Button>)}</ScrollView> : item === "Release Year" ? <YearRangeSlider value={draft.yearRange} onChange={(yearRange) => setDraft({ ...draft, yearRange })} /> : <View className="gap-1">{(["best", "worst"] as const).map((order) => <Pressable key={order} accessibilityRole="button" accessibilityLabel={order === "best" ? "Best to worst" : "Worst to best"} accessibilityState={{ selected: draft.ratingOrder === order }} onPress={() => setDraft({ ...draft, ratingOrder: draft.ratingOrder === order ? null : order })} className={cn("min-h-[48px] flex-row items-center gap-2 rounded-lg px-2", draft.ratingOrder === order && "bg-primary/15")}>
                 <View className="flex-row"><Ionicons name="arrow-up" size={20} color={colors.primary} /><Ionicons name="arrow-down" size={20} color={colors.primary} /></View>
                 <Text className="flex-1 text-base text-foreground">{order === "best" ? "Best to worst" : "Worst to best"}</Text>
                 {draft.ratingOrder === order ? <Ionicons name="checkmark" size={22} color={colors.primary} /> : null}

@@ -49,7 +49,7 @@ export default function Search() {
     }
   };
 
-  const hasFilters = filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
+  const hasFilters = filters.category !== null || filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
   const source = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query || hasFilters ? searchLocal(query, "all", catalog) : [];
   const data = applySearchFilters(source, filters);
 
