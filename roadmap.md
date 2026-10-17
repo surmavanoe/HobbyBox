@@ -15,3 +15,8 @@
 # Filter pop-up
 - [x] Replace the full-screen filter with a smaller overlay showing genre, the existing year slider, and ratings.
 - [x] Verify opening, applying, and dismissing the pop-up in Quick view.
+
+# Compact filter rows
+- [x] Add Category above a single horizontally scrollable Genre row.
+- [x] Keep the original year slider visible and verify dragging and filter application in Quick view.
+- [x] Test all five category selections.

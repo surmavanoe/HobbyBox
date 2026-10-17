@@ -7,6 +7,14 @@ test("release range starts at 1940 and ends at 2027", () => {
   expect(moveYearHandle([1940, 2027], 0, 1900)).toEqual([1940, 2027]);
   expect(moveYearHandle([1940, 2027], 1, 2030)).toEqual([1940, 2027]);
 });
+for (const category of ["film", "anime", "tv", "manga", "book"] as const) {
+  test(`${category} category includes only that media type`, () => {
+    const result = applySearchFilters(MEDIA, { ...EMPTY_SEARCH_FILTERS, category });
+    expect(result.map((item) => item.id)).toEqual(MEDIA.filter((item) => item.category === category).map((item) => item.id));
+    expect(result.length).toBeGreaterThan(0);
+    expect(result.length).toBeLessThan(MEDIA.length);
+  });
+}
 test("every integer from 1940 through 2026 is selectable", () => {
   for (let year = 1940; year <= 2026; year++) {
     expect(moveYearHandle([1940, 2027], 0, year)).toEqual([year, 2027]);
