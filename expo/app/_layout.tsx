@@ -1,7 +1,6 @@
 // Gesture handler must load before navigation modules (Expo Router requirement).
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "../global.css";
-import Constants from "expo-constants";
 import { Stack, ThemeProvider } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { colorScheme } from "nativewind";
@@ -9,44 +8,34 @@ import { useLayoutEffect } from "react";
 import { Platform } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { LogModal } from "../components/LogModal";
 import { LovablePreviewErrorReporter } from "../components/lovable-preview-error-reporter";
 import { LovablePreviewSafeArea } from "../components/lovable-preview-safe-area";
 import { LovablePreviewTextSelection } from "../components/lovable-preview-text-selection";
 import { LovableSimulatorGuard } from "../components/lovable-simulator-guard";
-import { navigationThemes, useAppColorScheme } from "../lib/theme";
-
-const userInterfaceStyle = Constants.expoConfig?.userInterfaceStyle ?? "light";
+import { StoreProvider } from "../lib/store";
+import { navigationThemes } from "../lib/theme";
 
 export default function RootLayout() {
-  const scheme = useAppColorScheme();
-
   useLayoutEffect(() => {
-    // Native applies app.json's userInterfaceStyle itself; on web nothing reads it, so seed NativeWind's store.
     if (Platform.OS !== "web") return;
-    colorScheme.set(userInterfaceStyle === "automatic" ? "system" : userInterfaceStyle);
+    colorScheme.set("dark");
+    document.documentElement.classList.toggle("dark", true);
   }, []);
 
-  useLayoutEffect(() => {
-    // NativeWind's web store follows the OS while unpinned but only toggles <html>'s `dark` class from set().
-    if (Platform.OS !== "web") return;
-    document.documentElement.classList.toggle("dark", scheme === "dark");
-  }, [scheme]);
-
   return (
-    // Native gesture components need this root, and Expo Router does not provide it.
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <LovablePreviewErrorReporter>
           <LovablePreviewSafeArea>
             <LovableSimulatorGuard>
-              <ThemeProvider value={navigationThemes[scheme]}>
-                <LovablePreviewTextSelection />
-                <StatusBar style="auto" />
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                  }}
-                />
+              <ThemeProvider value={navigationThemes.dark}>
+                <StoreProvider>
+                  <LovablePreviewTextSelection />
+                  <StatusBar style="light" />
+                  <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#0A0E17" } }} />
+                  <LogModal />
+                </StoreProvider>
               </ThemeProvider>
             </LovableSimulatorGuard>
           </LovablePreviewSafeArea>
