@@ -50,8 +50,9 @@ export default function Grid() {
         ListEmptyComponent={<Text className="px-4 text-muted-foreground">No titles in this category yet.</Text>}
         renderItem={({ item }) => (
           <Pressable onPress={() => openLog(item.id)} style={{ width: cardW }}>
-            <Cover media={item} className="w-full" rounded="rounded-lg" />
-            <View style={{ position: "absolute", top: 0, width: cardW, height: cardW * 1.5 }} pointerEvents="none" />
+            <View style={{ width: cardW, height: cardW * 1.5 }}>
+              <Cover media={item} className="h-full w-full" rounded="rounded-lg" />
+            </View>
             <Text className="mt-1.5 text-xs font-semibold text-foreground" numberOfLines={1}>
               {item.title}
             </Text>
