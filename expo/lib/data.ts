@@ -14,8 +14,10 @@ export const categoryLabel = (c: Category) => CATEGORIES.find((x) => x.key === c
 export const categoryIcon = (c: Category) => CATEGORIES.find((x) => x.key === c)!.icon;
 
 // "Popular this week" covers everything when no category is picked, otherwise it names the category.
-export const popularTitle = (filter: Category | "all") =>
-  filter === "all" ? "Popular this week" : `${categoryLabel(filter)} popular this week`;
+export const popularTitle = (filters: (Category | "all")[]) => {
+  const cats = filters.filter((f): f is Category => f !== "all");
+  return cats.length === 1 ? `${categoryLabel(cats[0])} popular this week` : "Popular this week";
+};
 
 // Ranks titles by how many words from recent searches they contain; unmatched titles keep catalog order.
 export function rankByRecentSearches(items: Media[], searches: string[]): Media[] {
