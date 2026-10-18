@@ -11,12 +11,12 @@ import { Button } from "@/components/ui/Button";
 
 function BadgeArt({ achievement, small = false }: { achievement: Achievement; small?: boolean }) {
   const colors = useThemeColors();
-  const size = small ? 34 : 72;
+  const size = small ? 42 : 86;
   return achievement.artwork ? (
-    <Image source={achievement.artwork === "marvel" ? marvelBadge : tolkienBadge} style={{ width: size, height: small ? 42 : 86 }} resizeMode="contain" />
+    <Image source={achievement.artwork === "marvel" ? marvelBadge : tolkienBadge} style={{ width: size, height: small ? 52 : 104 }} resizeMode="contain" />
   ) : (
-    <View style={{ width: size, height: small ? 42 : 86 }} className="items-center justify-center">
-      <Ionicons name={achievement.icon} size={small ? 24 : 40} color={colors.primary} />
+    <View style={{ width: size, height: small ? 52 : 104 }} className="items-center justify-center">
+      <Ionicons name={achievement.icon} size={small ? 28 : 48} color={colors.primary} />
     </View>
   );
 }
