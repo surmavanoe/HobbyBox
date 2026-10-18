@@ -219,7 +219,7 @@ export default function Search() {
           style={{ bottom: 16 }}
           accessibilityLabel="AI assistant"
         >
-          <Image source={require("../../assets/ai-assistant.png")} style={{ width: 72, height: 72 }} />
+          <Image source={require("../../assets/ai-assistant.png")} style={{ width: 95, height: 95 }} />
         </Pressable>
         <AiChatSheet visible={chatOpen} onClose={() => setChatOpen(false)} />
         <SearchFilterModal visible={showFilters} onClose={() => setShowFilters(false)} value={filters} onChange={setFilters} />
