@@ -79,7 +79,7 @@ export default function Search() {
     setAi(null); setError(false); setLoading(false); setNeedSignIn(false); setLastPrompt("");
   };
 
-  const hasFilters = filters.categories.length > 0 || filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
+  const hasFilters = filters.categories.length > 0 || filters.yearRange !== null || filters.genres.length > 0 || filters.ratingOrder !== null;
   const source = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query || hasFilters ? searchLocal(query, "all", catalog) : [];
   const data = applySearchFilters(source, filters);
 
@@ -129,7 +129,7 @@ export default function Search() {
               </View>
               </View>
               <CatalogStatus />
-              {mode === "browse" && (query || hasFilters) && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}{filters.yearRange ? ` · ${formatYearRange(filters.yearRange)}` : ""}{filters.genre ? ` · ${filters.genre}` : ""}{filters.ratingOrder ? ` · ${filters.ratingOrder === "best" ? "Best to worst" : "Worst to best"}` : ""}</Text> : null}
+              {mode === "browse" && (query || hasFilters) && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}{filters.yearRange ? ` · ${formatYearRange(filters.yearRange)}` : ""}{filters.genres.length ? ` · ${filters.genres.join(", ")}` : ""}{filters.ratingOrder ? ` · ${filters.ratingOrder === "best" ? "Best to worst" : "Worst to best"}` : ""}</Text> : null}
               {mode === "browse" && !query && !hasFilters ? (
                 <View className="gap-2 px-4 pt-2">
                   {SUGGESTIONS.map((s) => (
