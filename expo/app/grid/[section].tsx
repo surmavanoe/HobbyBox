@@ -23,20 +23,24 @@ export default function Grid() {
   const { width } = useWindowDimensions();
   const cardW = (Math.min(width, 600) - 16 * 2 - 12 * 2) / 3;
 
-  let data: Media[] = rankByRecentSearches(catalog.filter((m) => filter === "all" || m.category === filter), recentSearches);
+  const filters = filter.split(",").filter((f): f is Media["category"] => f !== "all" && f !== "");
+  const pass = (m: Media) => filters.length === 0 || filters.includes(m.category);
+
+  let data: Media[] = rankByRecentSearches(catalog.filter(pass), recentSearches);
   if (section === "friends") {
     const ids = new Set(FRIEND_LOGS.filter((l) => l.rating >= 4).map((l) => l.mediaId));
     data = [...ids].flatMap((id) => {
       const media = mediaById(id);
-      return media && (filter === "all" || media.category === filter) ? [media] : [];
+      return media && pass(media) ? [media] : [];
     });
   }
   if (section === "trending") data = [...data].sort((a, b) => b.rating - a.rating);
 
   const heading =
     section === "trending"
-      ? popularTitle(filter as Media["category"] | "all")
-      : (TITLES[section] ?? "More") + (filter !== "all" ? ` · ${categoryLabel(filter as Media["category"])}` : "");
+      ? popularTitle(filters)
+      : (TITLES[section] ?? "More") +
+        (filters.length === 1 ? ` · ${categoryLabel(filters[0])}` : filters.length > 1 ? ` · ${filters.length} categories` : "");
 
   return (
     <View className="flex-1 bg-background">
@@ -62,7 +66,7 @@ export default function Grid() {
             <Text className="mt-1.5 text-xs font-semibold text-foreground" numberOfLines={1}>
               {item.title}
             </Text>
-            {item.rating > 0 ? <Stars value={item.rating} size={10} /> : null}
+            {item.rating > 0 ? <Stars value={item.rating} size={10} showValue /> : null}
           </Pressable>
         )}
       />

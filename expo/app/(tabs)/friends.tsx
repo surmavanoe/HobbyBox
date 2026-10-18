@@ -15,12 +15,13 @@ export default function Friends() {
   const colors = useThemeColors();
   const { openDetail, watchlist, toggleWatchlist } = useStore();
   const params = useLocalSearchParams<{ who?: string }>();
-  const [who, setWho] = useState<string>(params.who ?? "all");
+  const [who, setWho] = useState<string[]>(params.who && params.who !== "all" ? [params.who] : []);
   useEffect(() => {
-    if (params.who) setWho(params.who);
+    if (params.who) setWho(params.who === "all" ? [] : [params.who]);
   }, [params.who]);
+  const toggleWho = (id: string) => setWho((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   const [liked, setLiked] = useState<Record<string, boolean>>({});
-  const data = FRIEND_LOGS.filter((l) => who === "all" || l.userId === who).sort((a, b) => b.createdAt - a.createdAt);
+  const data = FRIEND_LOGS.filter((l) => who.length === 0 || who.includes(l.userId)).sort((a, b) => b.createdAt - a.createdAt);
 
   return (
     <View className="flex-1 bg-background">
@@ -34,18 +35,18 @@ export default function Friends() {
               Friends <Text className="text-primary">Activity</Text>
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}>
-              <Pressable onPress={() => setWho("all")} className="min-h-[44px] items-center">
-                <View className={cn("h-[52px] w-[52px] items-center justify-center rounded-full border-2 bg-card", who === "all" ? "border-primary" : "border-border")}>
-                  <Ionicons name="people" size={22} color={who === "all" ? colors.primary : colors.mutedForeground} />
+              <Pressable onPress={() => setWho([])} className="min-h-[44px] items-center">
+                <View className={cn("h-[52px] w-[52px] items-center justify-center rounded-full border-2 bg-card", who.length === 0 ? "border-primary" : "border-border")}>
+                  <Ionicons name="people" size={22} color={who.length === 0 ? colors.primary : colors.mutedForeground} />
                 </View>
-                <Text className={cn("mt-1 text-xs", who === "all" ? "text-primary" : "text-muted-foreground")}>All</Text>
+                <Text className={cn("mt-1 text-xs", who.length === 0 ? "text-primary" : "text-muted-foreground")}>All</Text>
               </Pressable>
               {FRIENDS.map((f) => (
-                <Pressable key={f.id} onPress={() => setWho(f.id)} className="min-h-[44px] items-center">
-                  <View className={cn("rounded-full border-2", who === f.id ? "border-primary" : "border-transparent")}>
+                <Pressable key={f.id} onPress={() => toggleWho(f.id)} className="min-h-[44px] items-center">
+                  <View className={cn("rounded-full border-2", who.includes(f.id) ? "border-primary" : "border-transparent")}>
                     <Avatar uri={f.avatar} size={48} />
                   </View>
-                  <Text className={cn("mt-1 text-xs", who === f.id ? "text-primary" : "text-muted-foreground")}>{f.name}</Text>
+                  <Text className={cn("mt-1 text-xs", who.includes(f.id) ? "text-primary" : "text-muted-foreground")}>{f.name}</Text>
                 </Pressable>
               ))}
             </ScrollView>
