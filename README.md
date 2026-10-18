@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="expo/assets/icon.png" alt="Hobbybox app icon" width="88" />
+  <img src="docs/assets/hobbybox-logo.jpg" alt="Hobbybox mascot logo" width="240" />
 </p>
 
 <h1 align="center">Hobbybox</h1>
