@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">Hobbybox</h1>
-<p align="center"><strong>Every story. One place.</strong><br />A social media diary for films, TV, anime, books and manga.</p>
+<p align="center"><strong>Every story. One place.</strong><br />An entertainment diary for films, TV, anime, books and manga.</p>
 <p align="center">
   <a href="#why-hobbybox">The idea</a> ·
   <a href="#what-you-can-try">Features</a> ·
@@ -28,13 +28,14 @@ Log and review what you watch or read, build a profile across five formats, and 
 | AI title discovery | Describe a story in natural language; the server searches catalog embeddings and applies supported filters. |
 | Personal diary | Save ratings, reviews and rewatch/re-read entries on the current device. |
 | Watchlist and favorites | Bookmark titles and choose a favorite from each format for the rotating “Quintuple” profile. |
-| Achievements | Explore badges with progress derived from saved logs. |
+| Achievements | Explore log-based review/explorer badges and sample franchise achievements. |
 | Social discovery | Explore a sample friends feed; signed-in AI queries can use relationships and reviews stored in the backend. |
 
 ### MVP boundaries
 
 - Logs, watchlists, favorites and recent searches use **AsyncStorage on this device**. They do not sync to a cloud account.
 - The Friends screen and initial profile activity use sample data. They are not a live feed of your own friends.
+- Marvel and Tolkien completion badges and the Attack on Titan progress hint are demo values. First Review and Quintuple Explorer progress are computed from local logs.
 - Friend-aware AI search requires signing in and having relationships/reviews in the backend. A new account does not inherit the sample feed's friends.
 - AI history filters use backend library entries; they do not yet see logs added locally in this app.
 - Access tokens stay in memory. Sign in again after restarting; automatic session refresh is not implemented.

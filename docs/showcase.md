@@ -10,7 +10,7 @@ Hobbybox brings films, series, anime, books and manga into one diary, helping pe
 2. **Search:** filter by a category, genre and year range; open a title.
 3. **AI search:** try “A dark manga about a notebook that kills people.” Explain that matches come from the connected catalog.
 4. **Diary:** save a rating or review and add a title to the watchlist.
-5. **Profile:** show the saved entry, five favorites and achievement progress.
+5. **Profile:** show the saved entry, five favorites and the log-based First Review / Quintuple Explorer badges. Franchise badges use demo progress.
 6. **Friends:** show the sample feed. Describe live friend-aware AI as a separate backend feature that requires a signed-in account with friend data.
 
 If a service is unavailable, use ordinary catalog browsing and explain the dependency. Do not present static sample activity as real users.

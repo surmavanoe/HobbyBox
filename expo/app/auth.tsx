@@ -29,7 +29,7 @@ export default function Auth() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
   const { account, signUp, signOut, resetLocalData } = useStore();
-  const [mode, setMode] = useState<"up" | "in">("up");
+  const [mode, setMode] = useState<"up" | "in">("in");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [pw, setPw] = useState("");
