@@ -45,7 +45,9 @@ test("recent searches move matching titles to the front", async () => {
 
 test("popular-this-week heading adapts to the chosen category", async () => {
   const { popularTitle } = await import("./data");
-  expect(popularTitle("all")).toBe("Popular this week");
-  expect(popularTitle("tv")).toBe("TV popular this week");
-  expect(popularTitle("film")).toBe("Films popular this week");
+  expect(popularTitle([])).toBe("Popular this week");
+  expect(popularTitle(["all"])).toBe("Popular this week");
+  expect(popularTitle(["tv"])).toBe("TV popular this week");
+  expect(popularTitle(["film"])).toBe("Films popular this week");
+  expect(popularTitle(["film", "tv"])).toBe("Popular this week");
 });

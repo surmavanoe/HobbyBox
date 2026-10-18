@@ -16,7 +16,7 @@ export function LogModal() {
   const colors = useThemeColors();
   const [selected, setSelected] = useState<Media | undefined>();
   const [query, setQuery] = useState("");
-  const [cat, setCat] = useState<Filter>("all");
+  const [cats, setCats] = useState<Filter[]>([]);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [rewatch, setRewatch] = useState(false);
@@ -26,7 +26,7 @@ export function LogModal() {
     if (logModal.open) {
       setSelected(logModal.mediaId ? mediaById(logModal.mediaId) : undefined);
       setQuery("");
-      setCat("all");
+      setCats([]);
       setRating(0);
       setReview("");
       setRewatch(false);
@@ -34,7 +34,10 @@ export function LogModal() {
     }
   }, [logModal.open, logModal.mediaId]);
 
-  const results = useMemo(() => searchLocal(query, cat, catalog), [query, cat, catalog]);
+  const results = useMemo(
+    () => searchLocal(query, "all", catalog).filter((m) => cats.length === 0 || cats.includes(m.category)),
+    [query, cats, catalog],
+  );
   const reLabel = selected && (selected.category === "book" || selected.category === "manga") ? "Re-read" : "Re-watch";
 
   const save = () => {
@@ -77,7 +80,7 @@ export function LogModal() {
                         className="ml-2 flex-1 py-3 text-base text-foreground"
                       />
                     </View>
-                    <CategoryPills value={cat} onChange={setCat} />
+                    <CategoryPills values={cats} onChange={setCats} />
                     <CatalogStatus />
                   </View>
                 }

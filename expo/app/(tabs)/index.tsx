@@ -19,12 +19,12 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
   const { openDetail, catalog, catalogLoading, catalogError, recentSearches } = useStore();
-  const [filter, setFilter] = useState<Filter>("all");
-  const pass = (m: Media) => filter === "all" || m.category === filter;
+  const [filters, setFilters] = useState<Filter[]>([]);
+  const pass = (m: Media) => filters.length === 0 || filters.includes(m.category);
 
   const recommended = useMemo(
     () => rankByRecentSearches(catalog.filter(pass), recentSearches),
-    [filter, catalog, recentSearches],
+    [filters, catalog, recentSearches],
   );
   const friendLiked = useMemo(() => {
     const byMedia = new Map<string, string[]>();
@@ -34,16 +34,17 @@ export default function Home() {
         const media = mediaById(id);
         return media && pass(media) ? [{ media, friends: [...new Set(friends)] }] : [];
       });
-  }, [filter, catalog]);
+  }, [filters, catalog]);
   const trending = useMemo(
     () => catalog.filter(pass).sort((a, b) => b.rating - a.rating),
-    [filter, catalog],
+    [filters, catalog],
   );
+  const single = filters.length === 1 && filters[0] !== "all" ? filters[0] : null;
 
   const sections = [
     { key: "rec", icon: "bulb-outline", title: "Based on your recent searches:", empty: recommended.length === 0 },
     { key: "friends", icon: "heart-outline", title: "Liked by your friends", empty: friendLiked.length === 0 },
-    { key: "trending", icon: filter === "all" ? "flame-outline" : categoryIcon(filter), title: popularTitle(filter), empty: trending.length === 0 },
+    { key: "trending", icon: single ? categoryIcon(single) : "flame-outline", title: popularTitle(filters), empty: trending.length === 0 },
   ];
 
   return (
@@ -60,14 +61,14 @@ export default function Home() {
         data={catalogLoading || catalogError ? [] : sections}
         keyExtractor={(s) => s.key}
         contentContainerStyle={{ paddingBottom: 24 }}
-        ListHeaderComponent={<View className="py-2"><CategoryPills value={filter} onChange={setFilter} /><CatalogStatus /></View>}
+        ListHeaderComponent={<View className="py-2"><CategoryPills values={filters} onChange={setFilters} /><CatalogStatus /></View>}
         renderItem={({ item: s }) => (
           <View className="mt-4">
-            <SectionHeader icon={s.icon} title={s.title} onPress={() => router.push({ pathname: "/grid/[section]", params: { section: s.key, filter } })} />
+            <SectionHeader icon={s.icon} title={s.title} onPress={() => router.push({ pathname: "/grid/[section]", params: { section: s.key, filter: filters.join(",") || "all" } })} />
             {s.empty ? (
               <View className="mx-4 rounded-2xl border border-border bg-card p-4">
                 <Text className="text-muted-foreground">Nothing here for this category yet.</Text>
-                <Pressable onPress={() => setFilter("all")} className="mt-2 min-h-[44px] justify-center self-start">
+                <Pressable onPress={() => setFilters([])} className="mt-2 min-h-[44px] justify-center self-start">
                   <Text className="font-semibold text-primary">Show all categories</Text>
                 </Pressable>
               </View>
@@ -82,18 +83,13 @@ export default function Home() {
                   <Pressable onPress={() => openDetail(item.id)} className="w-[124px]" style={lift}>
                     <View style={{ transform: [{ perspective: 600 }, { rotateY: "-8deg" }] }}>
                       <Cover media={item} className="h-[180px] w-[124px] border-primary/40" />
-                      <View className="absolute bottom-2 left-2 right-2 items-center rounded-md border border-primary/60 bg-background/80 px-1 py-0.5">
-                        <Text className="text-[10px] font-semibold text-foreground" numberOfLines={1}>{item.title}</Text>
-                      </View>
                     </View>
-                    {item.rating > 0 ? <View className="mt-2">
-                      <Stars value={item.rating} />
-                    </View> : null}
-                    <Text className="mt-1 text-sm font-semibold text-foreground" numberOfLines={1}>
+                    <Text className="mt-2 text-sm font-semibold text-foreground" numberOfLines={1}>
                       {item.title}
                     </Text>
+                    {item.rating > 0 ? <Stars value={item.rating} showValue /> : null}
                     <Text className="text-xs text-muted-foreground" numberOfLines={1}>
-                      {[item.genres[0], categoryLabel(item.category), item.rating > 0 ? item.rating.toFixed(1) : null].filter(Boolean).join(" · ")}
+                      {[item.genres[0], categoryLabel(item.category)].filter(Boolean).join(" · ")}
                     </Text>
                   </Pressable>
                 )}
@@ -123,7 +119,7 @@ export default function Home() {
                     <Text className="mt-2 text-sm font-semibold text-foreground" numberOfLines={1}>
                       {item.media.title}
                     </Text>
-                    <Stars value={item.media.rating} />
+                    <Stars value={item.media.rating} showValue />
                   </Pressable>
                 )}
               />
@@ -142,17 +138,11 @@ export default function Home() {
                         <Ionicons name="flame" size={12} color={colors.primary} />
                         <Text className="text-[11px] font-bold text-foreground">#{index + 1} Trending</Text>
                       </View>
-                      {item.rating > 0 ? (
-                        <View className="absolute bottom-2 left-2 flex-row items-center gap-1 rounded-md bg-background/85 px-2 py-1">
-                          <Ionicons name="star" size={11} color={colors.primary} />
-                          <Text className="text-[11px] font-bold text-foreground">{item.rating.toFixed(1)}</Text>
-                        </View>
-                      ) : null}
                     </View>
                     <Text className="mt-2 text-sm font-semibold text-foreground" numberOfLines={1}>
                       {item.title}
                     </Text>
-                    {item.rating > 0 ? <Stars value={item.rating} /> : null}
+                    {item.rating > 0 ? <Stars value={item.rating} showValue /> : null}
                   </Pressable>
                 )}
               />

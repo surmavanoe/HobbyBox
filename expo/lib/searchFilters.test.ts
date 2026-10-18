@@ -9,7 +9,7 @@ test("release range starts at 1940 and ends at 2027", () => {
 });
 for (const category of ["film", "anime", "tv", "manga", "book"] as const) {
   test(`${category} category includes only that media type`, () => {
-    const result = applySearchFilters(MEDIA, { ...EMPTY_SEARCH_FILTERS, category });
+    const result = applySearchFilters(MEDIA, { ...EMPTY_SEARCH_FILTERS, categories: [category] });
     expect(result.map((item) => item.id)).toEqual(MEDIA.filter((item) => item.category === category).map((item) => item.id));
     expect(result.length).toBeGreaterThan(0);
     expect(result.length).toBeLessThan(MEDIA.length);
