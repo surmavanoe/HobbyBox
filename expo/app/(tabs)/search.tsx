@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Cover, Stars } from "@/components/hb";
+import { CategoryIcon, Cover, Stars } from "@/components/hb";
 import { CatalogStatus } from "@/components/CatalogStatus";
 import { AiChatSheet } from "@/components/AiChatSheet";
 import { router } from "expo-router";
 import { SearchFilterModal } from "@/components/SearchFilterModal";
-import { FRIEND_LOGS, categoryEmoji, categoryLabel, friendById, type Media } from "@/lib/data";
+import { FRIEND_LOGS, categoryLabel, friendById, type Media } from "@/lib/data";
 import { aiDiscover, searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
 import { applySearchFilters, EMPTY_SEARCH_FILTERS, formatYearRange, type SearchFilters } from "@/lib/searchFilters";
@@ -25,7 +25,7 @@ function friendContext(id: string) {
 export default function Search() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { openDetail, account, catalog, catalogLoading, catalogError } = useStore();
+  const { openDetail, addRecentSearch, account, catalog, catalogLoading, catalogError } = useStore();
   const [aiOn, setAiOn] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState("");
@@ -42,6 +42,7 @@ export default function Search() {
     if (!prompt.trim()) return;
     setMode("ai");
     setLastPrompt(prompt);
+    addRecentSearch(prompt);
     if (/\bfriends?\b/i.test(prompt) && !account?.token) {
       setNeedSignIn(true);
       setAi(null);
@@ -115,7 +116,7 @@ export default function Search() {
                     if (!aiOn && mode === "ai") setMode("browse");
                   }}
                   returnKeyType="search"
-                  onSubmitEditing={() => { if (aiOn) runAi(query); }}
+                  onSubmitEditing={() => { if (aiOn) runAi(query); else if (query.trim()) addRecentSearch(query); }}
                   placeholder="Search..."
                   placeholderTextColor={colors.mutedForeground}
                   className="ml-2 flex-1 py-3 text-base text-foreground"
@@ -190,9 +191,10 @@ export default function Search() {
                 <View className="flex-1">
                   <Text className="text-base font-bold text-foreground">{item.title}</Text>
                   <View className="mt-1 flex-row items-center gap-2">
-                    <View className="rounded-full border border-primary px-2 py-0.5">
+                    <View className="flex-row items-center gap-1 rounded-full border border-primary px-2 py-0.5">
+                      <CategoryIcon category={item.category} size={10} />
                       <Text className="text-[10px] font-bold text-primary">
-                        {categoryEmoji(item.category)} {categoryLabel(item.category)}
+                        {categoryLabel(item.category)}
                       </Text>
                     </View>
                     {item.year ? <Text className="text-xs text-muted-foreground">{item.year}</Text> : null}

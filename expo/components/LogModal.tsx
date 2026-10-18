@@ -143,7 +143,7 @@ export function LogModal() {
                       style={{ opacity: rating === 0 ? 0.5 : 1 }}
                     >
                       <Text className="text-base font-bold text-primary-foreground">
-                        {saved ? "Saved ✓" : rating === 0 ? "Pick a rating to save" : "Save log"}
+                        {saved ? "Saved" : rating === 0 ? "Pick a rating to save" : "Save log"}
                       </Text>
                     </Pressable>
                   </View>

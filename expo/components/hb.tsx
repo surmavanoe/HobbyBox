@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
-import { CATEGORIES, categoryEmoji, type Category, type Media } from "@/lib/data";
+import { CATEGORIES, categoryIcon, type Category, type Media } from "@/lib/data";
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ export function Cover({ media, className, rounded = "rounded-xl" }: { media: Med
   if (!media.cover || failed) {
     return (
       <View className={cn("items-center justify-center overflow-hidden border border-border bg-card p-2", rounded, className)}>
-        <Text className="text-3xl">{categoryEmoji(media.category)}</Text>
+        <Ionicons name={categoryIcon(media.category) as never} size={30} color={colors.primary} />
         <Text className="mt-2 text-center text-xs font-bold text-foreground" numberOfLines={3}>
           {media.title}
         </Text>
@@ -63,12 +63,18 @@ export function StarPicker({ value, onChange }: { value: number; onChange: (n: n
   );
 }
 
+export function CategoryIcon({ category, size = 12, color }: { category: Category; size?: number; color?: string }) {
+  const colors = useThemeColors();
+  return <Ionicons name={categoryIcon(category) as never} size={size} color={color ?? colors.primary} />;
+}
+
 export type Filter = Category | "all";
 
 export function CategoryPills({ value, onChange }: { value: Filter; onChange: (f: Filter) => void }) {
-  const items: { key: Filter; label: string }[] = [
+  const colors = useThemeColors();
+  const items: { key: Filter; label: string; icon?: string }[] = [
     { key: "all", label: "All" },
-    ...CATEGORIES.map((c) => ({ key: c.key as Filter, label: `${c.emoji} ${c.label}` })),
+    ...CATEGORIES.map((c) => ({ key: c.key as Filter, label: c.label, icon: c.icon })),
   ];
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
@@ -76,7 +82,8 @@ export function CategoryPills({ value, onChange }: { value: Filter; onChange: (f
         const active = it.key === value;
         return (
           <Pressable key={it.key} onPress={() => onChange(it.key)} className="min-h-[44px] justify-center">
-            <View className={cn("rounded-full border px-4 py-2", active ? "border-primary bg-primary/10" : "border-border bg-card")}>
+            <View className={cn("flex-row items-center gap-1.5 rounded-full border px-4 py-2", active ? "border-primary bg-primary/10" : "border-border bg-card")}>
+              {it.icon ? <Ionicons name={it.icon as never} size={14} color={active ? colors.primary : colors.mutedForeground} /> : null}
               <Text className={cn("text-sm font-semibold", active ? "text-primary" : "text-muted-foreground")}>{it.label}</Text>
             </View>
           </Pressable>
@@ -86,10 +93,11 @@ export function CategoryPills({ value, onChange }: { value: Filter; onChange: (f
   );
 }
 
-export function SectionHeader({ title, onPress }: { title: string; onPress?: () => void }) {
+export function SectionHeader({ title, onPress, icon }: { title: string; onPress?: () => void; icon?: string }) {
   const colors = useThemeColors();
   return (
     <Pressable onPress={onPress} className="min-h-[44px] flex-row items-center px-4" disabled={!onPress}>
+      {icon ? <Ionicons name={icon as never} size={18} color={colors.primary} style={{ marginRight: 8 }} /> : null}
       <Text className="flex-1 text-base font-bold text-foreground">{title}</Text>
       {onPress ? <Ionicons name="chevron-forward" size={18} color={colors.mutedForeground} /> : null}
     </Pressable>

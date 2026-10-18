@@ -6,7 +6,7 @@ import { FlatList, Image, Modal, Pressable, ScrollView, Text, View, useWindowDim
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cover, ORANGE, Stars } from "@/components/hb";
-import { CATEGORIES, FRIENDS, categoryEmoji, categoryLabel, mediaById, type Category } from "@/lib/data";
+import { CATEGORIES, FRIENDS, categoryLabel, mediaById, type Category } from "@/lib/data";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
@@ -36,7 +36,7 @@ function PentSlot({ i, cat, theta, cx, cy, R, cw, ch, onSlot }: { i: number; cat
       <Pressable onPress={() => onSlot(cat)} accessibilityLabel={`Change favorite ${categoryLabel(cat)}`} className="h-full w-full">
         {m ? <Cover media={m} className="h-full w-full border-primary" rounded="rounded-lg" /> : <View className="h-full w-full rounded-lg border border-primary bg-card" />}
         <View className="absolute -bottom-2 self-center rounded-full bg-background px-1.5">
-          <Text className="text-[10px]">{categoryEmoji(cat)}</Text>
+          <CategoryIcon category={cat} size={11} />
         </View>
       </Pressable>
     </Animated.View>

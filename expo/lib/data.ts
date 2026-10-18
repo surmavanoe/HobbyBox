@@ -2,16 +2,24 @@ import covers from "./covers.json";
 
 export type Category = "film" | "tv" | "anime" | "manga" | "book";
 
-export const CATEGORIES: { key: Category; label: string; emoji: string; plural: string }[] = [
-  { key: "film", label: "Films", emoji: "🎬", plural: "Films" },
-  { key: "tv", label: "TV", emoji: "📺", plural: "TV Shows" },
-  { key: "anime", label: "Anime", emoji: "🍿", plural: "Anime" },
-  { key: "manga", label: "Manga/Comics", emoji: "🗯️", plural: "Manga & Comics" },
-  { key: "book", label: "Books", emoji: "📚", plural: "Books" },
+export const CATEGORIES: { key: Category; label: string; icon: string; plural: string }[] = [
+  { key: "film", label: "Films", icon: "film-outline", plural: "Films" },
+  { key: "tv", label: "TV", icon: "tv-outline", plural: "TV Shows" },
+  { key: "anime", label: "Anime", icon: "sparkles-outline", plural: "Anime" },
+  { key: "manga", label: "Manga/Comics", icon: "chatbubbles-outline", plural: "Manga & Comics" },
+  { key: "book", label: "Books", icon: "book-outline", plural: "Books" },
 ];
 
 export const categoryLabel = (c: Category) => CATEGORIES.find((x) => x.key === c)!.label;
-export const categoryEmoji = (c: Category) => CATEGORIES.find((x) => x.key === c)!.emoji;
+export const categoryIcon = (c: Category) => CATEGORIES.find((x) => x.key === c)!.icon;
+
+// Ranks titles by how many words from recent searches they contain; unmatched titles keep catalog order.
+export function rankByRecentSearches(items: Media[], searches: string[]): Media[] {
+  const words = [...new Set(searches.join(" ").toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2))];
+  if (!words.length) return items;
+  const score = (m: Media) => { const t = `${m.title} ${m.genres.join(" ")} ${m.synopsis}`.toLowerCase(); return words.filter((w) => t.includes(w)).length; };
+  return items.map((m, i) => ({ m, s: score(m), i })).sort((a, b) => b.s - a.s || a.i - b.i).map((x) => x.m);
+}
 
 export interface Media {
   id: string;
