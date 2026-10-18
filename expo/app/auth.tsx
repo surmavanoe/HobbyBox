@@ -132,7 +132,7 @@ export default function Auth() {
                 <Text className="text-base font-bold text-primary-foreground">{mode === "up" ? "Sign up" : "Sign in"}</Text>
               </Pressable>
               <Pressable onPress={() => { setMode(mode === "up" ? "in" : "up"); setErr(""); }} className="mt-4 min-h-[44px] items-center justify-center">
-                <View className="flex-row items-center gap-1.5"><ThickPlus size={22} thickness={6} /><Text className="font-semibold text-foreground">{mode === "up" ? "Sign in" : "Create account"}</Text></View>
+                <View className="flex-row items-center gap-1.5"><ThickPlus size={22} thickness={6} floating={false} /><Text className="font-semibold text-foreground">{mode === "up" ? "Sign in" : "Create account"}</Text></View>
               </Pressable>
             </View>
           )}
