@@ -95,7 +95,7 @@ export default function Profile() {
   const { width, height } = useWindowDimensions();
   const { myLogs, account, setFavorite, openLog, favorites, watchlist, openDetail, catalog } = useStore();
   const [swap, setSwap] = useState<Category | null>(null);
-  const bannerH = Math.round(height * 0.28);
+  const bannerH = Math.round(height * 0.14);
   const pentSize = Math.min(width - 32, 360);
   const username = account?.username ?? "USERNAME";
   const split = Math.ceil(username.length / 2);

@@ -46,8 +46,14 @@ test("range filtering includes both endpoint years", () => {
 test("genre selection filters matching film genres", () => {
   const base = MEDIA[0];
   if (!base) throw new Error("Missing test fixture");
-  const items = [{ ...base, id: "action", genres: ["action"] }, { ...base, id: "drama", genres: ["drama"] }];
-  expect(applySearchFilters(items, { ...EMPTY_SEARCH_FILTERS, genre: "Action" }).map((m) => m.id)).toEqual(["action"]);
+  const items = [{ ...base, id: "action", genres: ["action"] }, { ...base, id: "drama", genres: ["drama"] }, { ...base, id: "both", genres: ["action", "drama"] }];
+  expect(applySearchFilters(items, { ...EMPTY_SEARCH_FILTERS, genres: ["Action"] }).map((m) => m.id)).toEqual(["action", "both"]);
+});
+test("several selected genres match any of them", () => {
+  const base = MEDIA[0];
+  if (!base) throw new Error("Missing test fixture");
+  const items = [{ ...base, id: "action", genres: ["action"] }, { ...base, id: "drama", genres: ["drama"] }, { ...base, id: "horror", genres: ["horror"] }];
+  expect(applySearchFilters(items, { ...EMPTY_SEARCH_FILTERS, genres: ["Action", "Horror"] }).map((m) => m.id)).toEqual(["action", "horror"]);
 });
 test("best to worst orders ratings descending", () => {
   const base = MEDIA[0];
