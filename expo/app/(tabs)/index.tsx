@@ -22,10 +22,6 @@ export default function Home() {
   const [filters, setFilters] = useState<Filter[]>([]);
   const pass = (m: Media) => filters.length === 0 || filters.includes(m.category);
 
-  const recommended = useMemo(
-    () => rankByRecentSearches(catalog.filter(pass), recentSearches),
-    [filters, catalog, recentSearches],
-  );
   const friendLiked = useMemo(() => {
     const byMedia = new Map<string, string[]>();
     FRIEND_LOGS.filter((l) => l.rating >= 4).forEach((l) => byMedia.set(l.mediaId, [...(byMedia.get(l.mediaId) ?? []), l.userId]));
@@ -35,6 +31,11 @@ export default function Home() {
         return media && pass(media) ? [{ media, friends: [...new Set(friends)] }] : [];
       });
   }, [filters, catalog]);
+  // Titles already shown in "Liked by your friends" are left out here so a poster never appears in both rows.
+  const recommended = useMemo(() => {
+    const taken = new Set(friendLiked.map((f) => f.media.id));
+    return rankByRecentSearches(catalog.filter(pass), recentSearches).filter((m) => !taken.has(m.id));
+  }, [filters, catalog, recentSearches, friendLiked]);
   const trending = useMemo(
     () => catalog.filter(pass).sort((a, b) => b.rating - a.rating),
     [filters, catalog],
