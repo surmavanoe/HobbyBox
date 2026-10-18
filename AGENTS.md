@@ -19,3 +19,4 @@
   npm run seed:social unless explicitly asked.
 - Verify backend with: cd backend && npm run seed:check.
 - Verify frontend with: cd expo && npx tsc --noEmit.
+- Sign-in uses Supabase Auth over REST in `expo/lib/mediaService.ts`; the access token lives in memory only (never persisted) and is sent to omni-search for friend queries — avoids storing credentials insecurely before the generated client exists.
