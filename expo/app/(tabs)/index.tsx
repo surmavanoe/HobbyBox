@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar, CategoryPills, Cover, Logo, SectionHeader, Stars, type Filter } from "@/components/hb";
 import { CatalogStatus } from "@/components/CatalogStatus";
-import { FRIEND_LOGS, categoryLabel, friendById, mediaById, rankByRecentSearches, type Media } from "@/lib/data";
+import { FRIEND_LOGS, categoryIcon, categoryLabel, friendById, mediaById, popularTitle, rankByRecentSearches, type Media } from "@/lib/data";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
@@ -36,14 +36,14 @@ export default function Home() {
       });
   }, [filter, catalog]);
   const trending = useMemo(
-    () => catalog.filter((m) => m.category === "tv").filter(pass).sort((a, b) => b.rating - a.rating),
+    () => catalog.filter(pass).sort((a, b) => b.rating - a.rating),
     [filter, catalog],
   );
 
   const sections = [
     { key: "rec", icon: "bulb-outline", title: "Based on your recent searches:", empty: recommended.length === 0 },
     { key: "friends", icon: "heart-outline", title: "Liked by your friends", empty: friendLiked.length === 0 },
-    { key: "trending", icon: "tv-outline", title: "Series popular this week", empty: trending.length === 0 },
+    { key: "trending", icon: filter === "all" ? "flame-outline" : categoryIcon(filter), title: popularTitle(filter), empty: trending.length === 0 },
   ];
 
   return (

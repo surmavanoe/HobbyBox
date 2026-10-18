@@ -4,7 +4,7 @@ import { FlatList, Pressable, Text, View, useWindowDimensions } from "react-nati
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cover, Stars } from "@/components/hb";
-import { FRIEND_LOGS, categoryLabel, mediaById, rankByRecentSearches, type Media } from "@/lib/data";
+import { FRIEND_LOGS, categoryLabel, mediaById, popularTitle, rankByRecentSearches, type Media } from "@/lib/data";
 import { CatalogStatus } from "@/components/CatalogStatus";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
@@ -31,7 +31,12 @@ export default function Grid() {
       return media && (filter === "all" || media.category === filter) ? [media] : [];
     });
   }
-  if (section === "trending") data = data.filter((m) => m.category === "tv");
+  if (section === "trending") data = [...data].sort((a, b) => b.rating - a.rating);
+
+  const heading =
+    section === "trending"
+      ? popularTitle(filter as Media["category"] | "all")
+      : (TITLES[section] ?? "More") + (filter !== "all" ? ` · ${categoryLabel(filter as Media["category"])}` : "");
 
   return (
     <View className="flex-1 bg-background">
@@ -39,10 +44,7 @@ export default function Grid() {
         <Pressable onPress={() => router.back()} className="min-h-[44px] min-w-[44px] items-center justify-center" accessibilityLabel="Back">
           <Ionicons name="chevron-back" size={26} color={colors.foreground} />
         </Pressable>
-        <Text className="flex-1 text-lg font-bold text-foreground">
-          {TITLES[section] ?? "More"}
-          {filter !== "all" ? ` · ${categoryLabel(filter as Media["category"])}` : ""}
-        </Text>
+        <Text className="flex-1 text-lg font-bold text-foreground">{heading}</Text>
       </View>
       <FlatList
         ListHeaderComponent={<CatalogStatus />}

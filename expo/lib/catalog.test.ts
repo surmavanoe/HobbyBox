@@ -42,3 +42,10 @@ test("recent searches move matching titles to the front", async () => {
   expect(rankByRecentSearches(items, ["spider"]).map((m) => m.id)).toEqual(["2", "1"]);
   expect(rankByRecentSearches(items, []).map((m) => m.id)).toEqual(["1", "2"]);
 });
+
+test("popular-this-week heading adapts to the chosen category", async () => {
+  const { popularTitle } = await import("./data");
+  expect(popularTitle("all")).toBe("Popular this week");
+  expect(popularTitle("tv")).toBe("TV popular this week");
+  expect(popularTitle("film")).toBe("Films popular this week");
+});
