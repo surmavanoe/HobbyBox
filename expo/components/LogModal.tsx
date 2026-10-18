@@ -11,6 +11,8 @@ import { searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
+import aotBadge from "@/assets/aot-badge.png";
+
 export function LogModal() {
   const { logModal, closeLog, addLog, catalog, catalogLoading, catalogError } = useStore();
   const insets = useSafeAreaInsets();
@@ -40,6 +42,7 @@ export function LogModal() {
     [query, cats, catalog],
   );
   const reLabel = selected && (selected.category === "book" || selected.category === "manga") ? "Re-read" : "Re-watch";
+  const achievementHint = selected ? getLogAchievementHint(selected) : undefined;
 
   const save = () => {
     if (!selected || rating === 0) return;
