@@ -5,6 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cover, Stars } from "@/components/hb";
 import { CatalogStatus } from "@/components/CatalogStatus";
+import { AiChatSheet } from "@/components/AiChatSheet";
+import { router } from "expo-router";
 import { SearchFilterModal } from "@/components/SearchFilterModal";
 import { FRIEND_LOGS, categoryEmoji, categoryLabel, friendById, type Media } from "@/lib/data";
 import { aiDiscover, searchLocal } from "@/lib/mediaService";
@@ -13,7 +15,7 @@ import { applySearchFilters, EMPTY_SEARCH_FILTERS, formatYearRange, type SearchF
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
-const SUGGESTIONS = ["Show me what my friends watched this week", "Something cozy like Frieren", "A dark mind-bending sci-fi series", "Short emotional books for a weekend", "Epic fantasy manga my friends rated highly"];
+const SUGGESTIONS = ["Drama my friends rated 5 stars", "Books my friends reviewed this month", "Sci-fi anime my friends rated 4+", "Something cozy like Frieren", "A dark mind-bending sci-fi series"];
 
 function friendContext(id: string) {
   const l = FRIEND_LOGS.filter((x) => x.mediaId === id).sort((a, b) => b.rating - a.rating)[0];
@@ -23,7 +25,7 @@ function friendContext(id: string) {
 export default function Search() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { openDetail, catalog, catalogLoading, catalogError } = useStore();
+  const { openDetail, account, catalog, catalogLoading, catalogError } = useStore();
   const [aiOn, setAiOn] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [query, setQuery] = useState("");
@@ -33,15 +35,23 @@ export default function Search() {
   const [error, setError] = useState(false);
   const [ai, setAi] = useState<{ intro: string; results: Media[] } | null>(null);
   const [lastPrompt, setLastPrompt] = useState("");
+  const [needSignIn, setNeedSignIn] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
 
   const runAi = async (prompt: string) => {
     if (!prompt.trim()) return;
     setMode("ai");
     setLastPrompt(prompt);
+    if (/\bfriends?\b/i.test(prompt) && !account?.token) {
+      setNeedSignIn(true);
+      setAi(null);
+      return;
+    }
+    setNeedSignIn(false);
     setLoading(true);
     setError(false);
     try {
-      setAi(await aiDiscover(prompt, "all", catalog));
+      setAi(await aiDiscover(prompt, "all", catalog, account?.token));
     } catch {
       setError(true);
     } finally {
@@ -116,6 +126,14 @@ export default function Search() {
                   ))}
                 </View>
               ) : null}
+              {mode === "ai" && needSignIn ? (
+                <View className="mx-4 rounded-2xl border border-border bg-card p-4">
+                  <Text className="text-foreground">Sign in to use your friends' ratings.</Text>
+                  <Pressable onPress={() => router.push("/auth")} className="mt-2 min-h-[44px] justify-center self-start">
+                    <Text className="font-semibold text-primary">Sign in</Text>
+                  </Pressable>
+                </View>
+              ) : null}
               {mode === "ai" && error ? (
                 <View className="mx-4 rounded-2xl border border-border bg-card p-4">
                   <Text className="text-foreground">The assistant couldn't find recommendations right now.</Text>
@@ -128,7 +146,7 @@ export default function Search() {
             </View>
           }
           ListEmptyComponent={
-            catalogLoading || catalogError || loading || error || (mode === "browse" && !query && !hasFilters) ? null : (
+            catalogLoading || catalogError || loading || error || (mode === "ai" && needSignIn) || (mode === "browse" && !query && !hasFilters) ? null : (
               <View className="mx-4 rounded-2xl border border-border bg-card p-4">
                   <Text className="text-muted-foreground">{hasFilters ? "No titles match these filters yet." : "No matches yet — try describing it to the assistant."}</Text>
                   <Pressable onPress={() => hasFilters ? setFilters({ ...EMPTY_SEARCH_FILTERS }) : runAi(query || "something great")} className="mt-2 min-h-[44px] justify-center self-start">
@@ -138,7 +156,7 @@ export default function Search() {
             )
           }
           renderItem={({ item }) => {
-            const fc = friendContext(item.id);
+            const fc = item.friendNote ?? friendContext(item.id);
             return (
               <Pressable onPress={() => openDetail(item.id)} className="mx-4 flex-row gap-3 rounded-2xl border border-border bg-card p-3 active:opacity-80">
                 <Cover media={item} className="h-[120px] w-[80px]" rounded="rounded-lg" />
@@ -167,14 +185,14 @@ export default function Search() {
           }}
         />
         <Pressable
-          disabled
+          onPress={() => setChatOpen(true)}
           className="absolute right-4 h-[72px] w-[72px] items-center justify-center rounded-full bg-primary"
           style={{ bottom: 16 }}
           accessibilityLabel="AI assistant"
-          accessibilityState={{ disabled: true }}
         >
           <Text className="text-xl font-black text-primary-foreground">AI</Text>
         </Pressable>
+        <AiChatSheet visible={chatOpen} onClose={() => setChatOpen(false)} />
         <SearchFilterModal visible={showFilters} onClose={() => setShowFilters(false)} value={filters} onChange={setFilters} />
       </View>
     </KeyboardAvoidingView>
