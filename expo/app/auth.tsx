@@ -8,14 +8,13 @@ import { signInAccount } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
-const LANGS = ["EN", "ES", "FR", "DE", "JA"];
-
 function Field(props: { label: string; value: string; onChange: (s: string) => void; secure?: boolean; keyboard?: "email-address" }) {
   const colors = useThemeColors();
   return (
     <TextInput
       value={props.value}
       onChangeText={props.onChange}
+      accessibilityLabel={props.label}
       placeholder={props.label}
       placeholderTextColor={colors.mutedForeground}
       secureTextEntry={props.secure}
@@ -29,30 +28,39 @@ function Field(props: { label: string; value: string; onChange: (s: string) => v
 export default function Auth() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { account, signUp, signOut, deleteAccount } = useStore();
-  const [lang, setLang] = useState(0);
+  const { account, signUp, signOut, resetLocalData } = useStore();
   const [mode, setMode] = useState<"up" | "in">("up");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [err, setErr] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [notice, setNotice] = useState("");
 
   const [busy, setBusy] = useState(false);
   const submit = async () => {
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setErr("Enter a valid email.");
+    if (busy) return;
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setErr("Enter a valid email.");
     if (mode === "up" && username.trim().length < 3) return setErr("Username needs at least 3 characters.");
     if (pw.length < 6) return setErr("Password needs at least 6 characters.");
     if (mode === "up" && pw !== pw2) return setErr("Passwords don't match.");
     setErr("");
+    setNotice("");
     setBusy(true);
     try {
       const token = await signInAccount(email.trim(), pw, mode === "up");
+      if (!token) {
+        setNotice("Check your inbox to confirm your email, then sign in.");
+        setMode("in");
+        setPw("");
+        setPw2("");
+        return;
+      }
       signUp({ email: email.trim(), username: mode === "up" ? username.trim() : email.split("@")[0], token });
       router.back();
-    } catch {
-      setErr(mode === "up" ? "Couldn't create the account. Try signing in instead." : "Wrong email or password.");
+    } catch (error) {
+      setErr(error instanceof TypeError ? "Couldn't connect. Check your connection and try again." : error instanceof Error ? error.message : "Something went wrong. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -78,11 +86,7 @@ export default function Auth() {
               <Ionicons name="chevron-back" size={26} color={colors.foreground} />
             </Pressable>
             <View className="flex-1" />
-            <Pressable onPress={() => setLang((l) => (l + 1) % LANGS.length)} className="min-h-[44px] justify-center">
-              <Text className="text-sm text-muted-foreground">
-                Language: <Text className="font-bold text-primary">{LANGS[lang]}</Text>
-              </Text>
-            </Pressable>
+            <Text className="text-sm text-muted-foreground">Account</Text>
           </View>
 
           {account?.token ? (
@@ -95,21 +99,21 @@ export default function Auth() {
               <Pressable onPress={() => { signOut(); router.back(); }} className="mt-4 min-h-[52px] w-full items-center justify-center rounded-full bg-primary">
                 <Text className="font-bold text-primary-foreground">Sign out</Text>
               </Pressable>
-              {confirmDelete ? (
+              {confirmReset ? (
                 <View className="w-full gap-2 rounded-2xl border border-border bg-card p-4">
-                  <Text className="text-foreground">Delete your account and all your logs? This can't be undone.</Text>
+                  <Text className="text-foreground">Reset logs, favorites, watchlist and search history on this device to the demo defaults? Your online account will remain.</Text>
                   <View className="flex-row gap-2">
-                    <Pressable onPress={() => setConfirmDelete(false)} className="min-h-[44px] flex-1 items-center justify-center rounded-full border border-border">
+                    <Pressable onPress={() => setConfirmReset(false)} className="min-h-[44px] flex-1 items-center justify-center rounded-full border border-border">
                       <Text className="text-foreground">Cancel</Text>
                     </Pressable>
-                    <Pressable onPress={() => { deleteAccount(); router.back(); }} className="min-h-[44px] flex-1 items-center justify-center rounded-full bg-destructive">
-                      <Text className="font-bold text-destructive-foreground">Delete</Text>
+                    <Pressable onPress={() => { resetLocalData(); router.back(); }} className="min-h-[44px] flex-1 items-center justify-center rounded-full bg-destructive">
+                      <Text className="font-bold text-destructive-foreground">Reset</Text>
                     </Pressable>
                   </View>
                 </View>
               ) : (
-                <Pressable onPress={() => setConfirmDelete(true)} className="min-h-[44px] justify-center">
-                  <Text className="text-destructive">Delete account</Text>
+                <Pressable onPress={() => setConfirmReset(true)} className="min-h-[44px] justify-center">
+                  <Text className="text-destructive">Reset local demo data</Text>
                 </Pressable>
               )}
             </View>
@@ -123,15 +127,17 @@ export default function Auth() {
                   HOBBY<Text className="text-primary">BOX</Text>
                 </Text>
               </View>
+              <Text className="text-center text-sm text-muted-foreground">Sign in for personal and friend-aware AI search. Logs and watchlists stay on this device.</Text>
               <Field label="Email" value={email} onChange={setEmail} keyboard="email-address" />
               {mode === "up" ? <Field label="Username" value={username} onChange={setUsername} /> : null}
               <Field label="Password" value={pw} onChange={setPw} secure />
               {mode === "up" ? <Field label="Repeat Password" value={pw2} onChange={setPw2} secure /> : null}
-              {err ? <Text className="text-center text-destructive">{err}</Text> : null}
+              {notice ? <Text accessibilityLiveRegion="polite" className="text-center text-primary">{notice}</Text> : null}
+              {err ? <Text accessibilityLiveRegion="polite" className="text-center text-destructive">{err}</Text> : null}
               <Pressable onPress={submit} disabled={busy} className="min-h-[52px] items-center justify-center rounded-full bg-primary active:opacity-80">
-                <Text className="text-base font-bold text-primary-foreground">{mode === "up" ? "Sign up" : "Sign in"}</Text>
+                <Text className="text-base font-bold text-primary-foreground">{busy ? "Please wait…" : mode === "up" ? "Sign up" : "Sign in"}</Text>
               </Pressable>
-              <Pressable onPress={() => { setMode(mode === "up" ? "in" : "up"); setErr(""); }} className="mt-4 min-h-[44px] items-center justify-center">
+              <Pressable disabled={busy} onPress={() => { setMode(mode === "up" ? "in" : "up"); setErr(""); setNotice(""); }} className="mt-4 min-h-[44px] items-center justify-center">
                 <View className="flex-row items-center gap-1.5"><ThickPlus size={22} thickness={6} floating={false} /><Text className="font-semibold text-foreground">{mode === "up" ? "Sign in" : "Create account"}</Text></View>
               </Pressable>
             </View>

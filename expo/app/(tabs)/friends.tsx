@@ -34,6 +34,7 @@ export default function Friends() {
             <Text className="px-4 text-2xl font-bold text-foreground">
               Friends <Text className="text-primary">Activity</Text>
             </Text>
+            <Text className="px-4 text-xs text-muted-foreground">Sample activity · Explore how recommendations from friends could look.</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}>
               <Pressable onPress={() => setWho([])} className="min-h-[44px] items-center">
                 <View className={cn("h-[52px] w-[52px] items-center justify-center rounded-full border-2 bg-card", who.length === 0 ? "border-primary" : "border-border")}>

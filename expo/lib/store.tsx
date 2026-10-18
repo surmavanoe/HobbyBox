@@ -23,7 +23,7 @@ interface StoreValue {
   setFavorite: (c: Category, mediaId: string) => void;
   signUp: (a: Account) => void;
   signOut: () => void;
-  deleteAccount: () => void;
+  resetLocalData: () => void;
   logModal: { open: boolean; mediaId?: string };
   openLog: (mediaId?: string) => void;
   closeLog: () => void;
@@ -106,11 +106,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       signOut: () => setAccount(null),
       recentSearches,
       addRecentSearch: (q: string) => { const t = q.trim(); if (t) setRecentSearches((r) => [t, ...r.filter((x) => x !== t)].slice(0, 10)); },
-      deleteAccount: () => {
+      resetLocalData: () => {
         setAccount(null);
         setMyLogs(MY_SEED_LOGS);
         setFavorites(DEFAULT_FAVORITES);
         setWatchlist([]);
+        setRecentSearches([]);
+        setDetailId(null);
+        setLogModal({ open: false });
       },
       logModal,
       openLog: (mediaId) => setLogModal({ open: true, mediaId }),

@@ -20,7 +20,10 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "backgroundColor": "#0A0E17"
+      "backgroundColor": "#0A0E17",
+      "name": "Hobbybox",
+      "shortName": "Hobbybox",
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-router",
@@ -31,6 +34,7 @@
     "android": {
       "package": "app.lovable.p780deb0afb64465797244c3aef43bf15"
     },
-    "backgroundColor": "#0A0E17"
+    "backgroundColor": "#0A0E17",
+    "description": "Your films, series, anime, books and manga, together. Track what you love and discover your next story."
   }
 }

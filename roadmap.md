@@ -30,5 +30,16 @@
 
 # Public AI search
 - [x] Replace local discovery with the existing omni-search POST and map backend fields without UI or backend changes.
-- [x] Test request headers, result mapping and failures; verify live public search in Quick view.## Log achievement hint
+- [x] Test request headers, result mapping and failures; verify live public search in Quick view.
+
+## Log achievement hint
 - [x] Show "Attack on Titan Marathon" card (7/8) between rewatch and Save log when logging Attack on Titan; verified in Quick view.
+
+## Public portfolio polish
+- [x] Replace the generated README with the product problem, capabilities, setup and honest MVP boundaries.
+- [x] Handle signup email confirmation and distinguish local reset from online account deletion.
+- [x] Label sample activity and device-local storage in the app.
+- [ ] Add cloud synchronization for logs, reviews, watchlists and favorites.
+- [ ] Connect the Friends feed and friend management to authenticated backend data.
+- [ ] Add session refresh, password recovery and server-side account deletion.
+- [ ] Record a demo and capture real app screenshots after verifying the deployed build.
