@@ -9,6 +9,7 @@
 - The search filter modal keeps draft selections until Apply Filters; dismissing discards the draft — keeps the overlay from changing results behind the user before confirmation.
 
 ## Backend
+- Profile achievement progress is derived from saved logs against canonical media identities in a pure helper, never poster substitutions; shared profile sheets expose all badges and reviews without backend changes.
 - Supabase project: smeucssdhwbfoiaethcm. Do not create a new project.
 - Frontend: expo/. Backend: supabase/ and backend/.
 - AI function: supabase/functions/omni-search/index.ts, already deployed.
