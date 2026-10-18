@@ -39,7 +39,7 @@ export default function Home() {
     () => catalog.filter(pass).sort((a, b) => b.rating - a.rating),
     [filters, catalog],
   );
-  const single = filters.length === 1 ? filters[0] : null;
+  const single = filters.length === 1 && filters[0] !== "all" ? filters[0] : null;
 
   const sections = [
     { key: "rec", icon: "bulb-outline", title: "Based on your recent searches:", empty: recommended.length === 0 },

@@ -26,7 +26,7 @@ export function LogModal() {
     if (logModal.open) {
       setSelected(logModal.mediaId ? mediaById(logModal.mediaId) : undefined);
       setQuery("");
-      setCat("all");
+      setCats([]);
       setRating(0);
       setReview("");
       setRewatch(false);
