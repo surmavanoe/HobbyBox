@@ -1,3 +1,4 @@
+# Files excluded from version control: dependencies, local secrets and build output.
 node_modules/
 
 # Backend seed secrets (local only)
