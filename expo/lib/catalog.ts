@@ -6,6 +6,10 @@ export interface CatalogRow {
   format: string;
   synopsis: string | null;
   external_id: string | null;
+  poster_url?: string | null;
+  release_year?: number | null;
+  genres?: string[] | null;
+  average_rating?: number | null;
 }
 
 const categories: Record<string, Category> = {
@@ -22,12 +26,11 @@ export function mapCatalogRow(row: CatalogRow): Media {
     title: row.title,
     category,
     synopsis: row.synopsis ?? "",
-    cover: matching?.cover ?? "",
+    cover: row.poster_url || matching?.cover || "",
     creator: matching?.creator ?? "",
-    year: matching?.year ?? 0,
-    genres: matching?.genres ?? [],
-    // Demo community statistics are not database ratings.
-    rating: 0,
+    year: row.release_year ?? matching?.year ?? 0,
+    genres: row.genres?.length ? row.genres : matching?.genres ?? [],
+    rating: row.average_rating ?? 0,
     logs: 0,
   };
 }

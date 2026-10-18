@@ -80,6 +80,7 @@ export default function Search() {
                     if (mode === "ai") setMode("browse");
                   }}
                   returnKeyType="search"
+                  onSubmitEditing={() => { if (aiOn) runAi(query); }}
                   placeholder="Search..."
                   placeholderTextColor={colors.mutedForeground}
                   className="ml-2 flex-1 py-3 text-base text-foreground"

@@ -20,3 +20,7 @@ test("database category and synopsis remain authoritative", () => {
   expect(filterCatalog([item], "CHAINSAW", "manga")).toHaveLength(1);
   expect(filterCatalog([item], "CHAINSAW", "anime")).toHaveLength(0);
 });
+test("database poster, year and genres override demo values", () => {
+  const item = mapCatalogRow({ id: "u", title: "X", format: "film", synopsis: null, external_id: null, poster_url: "https://p/x.jpg", release_year: 1999, genres: ["Drama"], average_rating: 4.2 });
+  expect(item).toMatchObject({ cover: "https://p/x.jpg", year: 1999, genres: ["Drama"], rating: 4.2 });
+});
