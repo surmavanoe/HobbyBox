@@ -1,4 +1,10 @@
 # Catalog connection
+# Profile achievements
+- [ ] Add achievement cards below Quintuple and the two reference icons beside Friends.
+- [ ] Add working See more views for achievements and recent reviews.
+- [ ] Test saved-log progress and verify the profile flow in Quick view.
+
+# Catalog connection
 - [x] Load all database media into search, home, and title details.
 - [x] Preserve existing on-phone logs and watchlist lookups.
 - [x] Test all 60 titles and verify search-to-detail-to-watchlist in Quick view.
