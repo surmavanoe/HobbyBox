@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryIcon, Cover, Stars } from "@/components/hb";
@@ -215,11 +215,11 @@ export default function Search() {
         />
         <Pressable
           onPress={() => setChatOpen(true)}
-          className="absolute right-4 h-[72px] w-[72px] items-center justify-center rounded-full bg-primary"
+          className="absolute right-4 h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full bg-primary"
           style={{ bottom: 16 }}
           accessibilityLabel="AI assistant"
         >
-          <Text className="text-xl font-black text-primary-foreground">AI</Text>
+          <Image source={require("../../assets/ai-assistant.png")} style={{ width: 72, height: 72 }} />
         </Pressable>
         <AiChatSheet visible={chatOpen} onClose={() => setChatOpen(false)} />
         <SearchFilterModal visible={showFilters} onClose={() => setShowFilters(false)} value={filters} onChange={setFilters} />

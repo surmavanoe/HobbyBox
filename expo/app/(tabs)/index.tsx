@@ -26,15 +26,17 @@ export default function Home() {
     () => rankByRecentSearches(catalog.filter(pass), recentSearches),
     [filters, catalog, recentSearches],
   );
+  // Titles already shown in "Based on your recent searches" are left out here so a poster never appears in both rows.
   const friendLiked = useMemo(() => {
+    const taken = new Set(recommended.map((m) => m.id));
     const byMedia = new Map<string, string[]>();
     FRIEND_LOGS.filter((l) => l.rating >= 4).forEach((l) => byMedia.set(l.mediaId, [...(byMedia.get(l.mediaId) ?? []), l.userId]));
     return [...byMedia.entries()]
       .flatMap(([id, friends]) => {
         const media = mediaById(id);
-        return media && pass(media) ? [{ media, friends: [...new Set(friends)] }] : [];
+        return media && pass(media) && !taken.has(media.id) ? [{ media, friends: [...new Set(friends)] }] : [];
       });
-  }, [filters, catalog]);
+  }, [filters, catalog, recommended]);
   const trending = useMemo(
     () => catalog.filter(pass).sort((a, b) => b.rating - a.rating),
     [filters, catalog],
