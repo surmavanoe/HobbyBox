@@ -25,6 +25,7 @@ export interface Media {
   synopsis: string;
   logs: number;
   trendingRank?: number;
+  friendNote?: string;
 }
 
 const c = (k: string) => ((covers as Record<string, string>)[k] ?? "") as string;
