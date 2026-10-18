@@ -1,7 +1,7 @@
 # Profile achievements
-- [ ] Add achievement cards below Quintuple and the two reference icons beside Friends.
-- [ ] Add working See more views for achievements and recent reviews.
-- [ ] Test saved-log progress and verify the profile flow in Quick view.
+- [x] Add achievement cards below Quintuple and the two reference icons beside Friends.
+- [x] Add working See more views for achievements and recent reviews.
+- [x] Test saved-log progress and verify the profile flow in Quick view.
 
 # Catalog connection
 - [x] Load all database media into search, home, and title details.

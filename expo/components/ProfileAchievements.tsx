@@ -9,11 +9,14 @@ import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 import { Button } from "@/components/ui/Button";
 
+// Native Image and Metro need an absolute address for Lovable-hosted assets.
+const ASSET_ORIGIN = "https://id-preview--780deb0a-fb64-4657-9724-4c3aef43bf15.lovable.app";
+
 function BadgeArt({ achievement, small = false }: { achievement: Achievement; small?: boolean }) {
   const colors = useThemeColors();
   const size = small ? 34 : 72;
   return achievement.artwork ? (
-    <Image source={{ uri: achievement.artwork === "marvel" ? marvel.url : tolkien.url }} style={{ width: size, height: small ? 42 : 86 }} resizeMode="contain" />
+    <Image source={{ uri: `${ASSET_ORIGIN}${achievement.artwork === "marvel" ? marvel.url : tolkien.url}` }} style={{ width: size, height: small ? 42 : 86 }} resizeMode="contain" />
   ) : (
     <View style={{ width: size, height: small ? 42 : 86 }} className="items-center justify-center">
       <Ionicons name={achievement.icon} size={small ? 24 : 40} color={colors.primary} />
