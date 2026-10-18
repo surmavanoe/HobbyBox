@@ -58,8 +58,8 @@ export default function Auth() {
     }
   };
 
-  const ThickPlus = ({ size = 30, thickness = 8, style, opacity = 1 }: { size?: number; thickness?: number; style?: object; opacity?: number }) => (
-    <View style={[{ position: "absolute", width: size, height: size, opacity }, style]} pointerEvents="none">
+  const ThickPlus = ({ size = 30, thickness = 8, style, opacity = 1, floating = true }: { size?: number; thickness?: number; style?: object; opacity?: number; floating?: boolean }) => (
+    <View style={[{ position: floating ? "absolute" : "relative", width: size, height: size, opacity }, style]} pointerEvents="none">
       <View style={{ position: "absolute", left: 0, top: (size - thickness) / 2, width: size, height: thickness, backgroundColor: colors.primary }} />
       <View style={{ position: "absolute", top: 0, left: (size - thickness) / 2, width: thickness, height: size, backgroundColor: colors.primary }} />
     </View>
