@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
+import { FlatList, Image, KeyboardAvoidingView, Modal, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryPills, Cover, StarPicker, type Filter } from "@/components/hb";
 import { CatalogStatus } from "@/components/CatalogStatus";
+import { getLogAchievementHint } from "@/lib/achievements";
 import { categoryLabel, mediaById, type Media } from "@/lib/data";
 import { searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
