@@ -68,10 +68,10 @@ export default function Auth() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <View className="flex-1 bg-background">
-        <Plus style={{ top: insets.top + 60, left: 16 }} />
-        <Plus style={{ top: insets.top + 60, right: 16 }} />
-        <Plus style={{ bottom: insets.bottom + 16, left: 16 }} />
-        <Plus style={{ bottom: insets.bottom + 16, right: 16 }} />
+        <ThickPlus style={{ top: insets.top + 60, left: 16 }} opacity={0.6} />
+        <ThickPlus style={{ top: insets.top + 60, right: 16 }} opacity={0.6} />
+        <ThickPlus style={{ bottom: insets.bottom + 16, left: 16 }} opacity={0.6} />
+        <ThickPlus style={{ bottom: insets.bottom + 16, right: 16 }} opacity={0.6} />
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingTop: insets.top + 4, paddingBottom: insets.bottom + 32, paddingHorizontal: 28 }}>
           <View className="flex-row items-center">
             <Pressable onPress={() => router.back()} className="min-h-[44px] min-w-[44px] items-center justify-center" accessibilityLabel="Back">
@@ -132,8 +132,7 @@ export default function Auth() {
                 <Text className="text-base font-bold text-primary-foreground">{mode === "up" ? "Sign up" : "Sign in"}</Text>
               </Pressable>
               <Pressable onPress={() => { setMode(mode === "up" ? "in" : "up"); setErr(""); }} className="mt-4 min-h-[44px] items-center justify-center">
-                <Ionicons name="add" size={26} color={colors.primary} />
-                <Text className="font-semibold text-foreground">{mode === "up" ? "Sign in" : "Create account"}</Text>
+                <View className="flex-row items-center gap-1.5"><ThickPlus size={22} thickness={6} /><Text className="font-semibold text-foreground">{mode === "up" ? "Sign in" : "Create account"}</Text></View>
               </Pressable>
             </View>
           )}
