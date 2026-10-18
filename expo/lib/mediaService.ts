@@ -10,7 +10,7 @@ export async function fetchCatalog(): Promise<Media[]> {
   const items: Media[] = [];
   const pageSize = 500;
   for (let offset = 0; ; offset += pageSize) {
-    const response = await fetch(`${CATALOG_URL}?select=id,title,format,synopsis,external_id&order=title.asc,id.asc&offset=${offset}&limit=${pageSize}`, {
+    const response = await fetch(`${CATALOG_URL}?select=id,title,format,synopsis,external_id,poster_url,release_year,genres,average_rating&order=title.asc,id.asc&offset=${offset}&limit=${pageSize}`, {
       headers: { apikey: PUBLISHABLE_KEY },
     });
     if (!response.ok) throw new Error("Catalog unavailable");
