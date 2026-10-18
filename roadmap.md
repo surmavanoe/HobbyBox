@@ -20,3 +20,7 @@
 - [x] Add Category above a single horizontally scrollable Genre row.
 - [x] Keep the original year slider visible and verify dragging and filter application in Quick view.
 - [x] Test all five category selections.
+
+# Public AI search
+- [x] Replace local discovery with the existing omni-search POST and map backend fields without UI or backend changes.
+- [x] Test request headers, result mapping and failures; verify live public search in Quick view.

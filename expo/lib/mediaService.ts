@@ -62,65 +62,55 @@ export async function searchOpenLibrary(query: string): Promise<Media[]> {
   }));
 }
 
-// ---- AI discovery assistant (on-device intent matching over the catalog) ----
-const KEYWORDS: Record<string, string[]> = {
-  "sci-fi": ["sci-fi", "scifi", "science fiction", "space", "future", "alien", "robot", "time travel"],
-  fantasy: ["fantasy", "magic", "dragon", "wizard", "elf", "myth"],
-  dark: ["dark", "grim", "bleak", "disturbing", "violent"],
-  cozy: ["cozy", "comfort", "wholesome", "chill", "relaxing", "light"],
-  emotional: ["emotional", "cry", "sad", "touching", "heartfelt", "tearjerker"],
-  comedy: ["funny", "comedy", "laugh", "hilarious", "funny"],
-  romance: ["romance", "love", "romantic"],
-  thriller: ["thriller", "tense", "suspense", "twist"],
-  mystery: ["mystery", "puzzle", "mind-bending", "mindbending", "detective"],
-  action: ["action", "fight", "battle"],
-  history: ["history", "historical", "samurai", "viking", "war"],
-  family: ["family", "siblings", "sister", "brother"],
-  short: ["short", "quick", "weekend"],
-  epic: ["epic", "long", "saga", "huge"],
-};
+// Public semantic search runs on the existing backend, not on-device.
+const OMNI_SEARCH_URL = "https://smeucssdhwbfoiaethcm.supabase.co/functions/v1/omni-search";
 
-const CAT_WORDS: Record<Category, string[]> = {
-  film: ["movie", "movies", "film", "films"],
-  tv: ["show", "shows", "series", "tv"],
-  anime: ["anime"],
-  manga: ["manga", "comic", "comics", "graphic novel"],
-  book: ["book", "books", "novel", "novels", "read"],
-};
+interface OmniSearchItem {
+  id: string;
+  title: string;
+  format: Category;
+  release_year: number | null;
+  poster_url: string | null;
+  average_rating: number | null;
+  genres: string[] | null;
+  synopsis: string | null;
+}
 
 export interface AiResult {
   intro: string;
   results: Media[];
 }
 
-export async function aiDiscover(prompt: string, category: Category | "all" = "all", catalog: Media[] = MEDIA): Promise<AiResult> {
-  const p = prompt.toLowerCase();
-  const wantedCats = (Object.keys(CAT_WORDS) as Category[]).filter((c) => CAT_WORDS[c].some((w) => p.includes(w)));
-  const tags = Object.entries(KEYWORDS)
-    .filter(([, words]) => words.some((w) => p.includes(w)))
-    .map(([t]) => t);
-  const like = catalog.find((m) => p.includes(m.title.toLowerCase().split(":")[0]));
-  const likeTags = like ? like.genres : [];
-  const allTags = [...new Set([...tags, ...likeTags])];
-
-  const scored = catalog.filter((m) => m.id !== like?.id)
-    .filter((m) => (category !== "all" ? m.category === category : wantedCats.length ? wantedCats.includes(m.category) : true))
-    .map((m) => {
-      const overlap = m.genres.filter((g) => allTags.includes(g)).length;
-      const text = `${m.title} ${m.synopsis} ${m.creator}`.toLowerCase();
-      const words = p.split(/\W+/).filter((w) => w.length > 3);
-      const textHits = words.filter((w) => text.includes(w)).length;
-      return { m, s: overlap * 3 + textHits + m.rating / 5 };
-    })
-    .filter((x) => x.s > 1 || allTags.length === 0)
-    .sort((a, b) => b.s - a.s)
-    .slice(0, 9)
-    .map((x) => x.m);
-
-  // small delay to feel like the assistant is thinking
-  await new Promise((r) => setTimeout(r, 700));
+// Retain the existing call signature; the local catalog no longer drives AI results.
+export async function aiDiscover(prompt: string, category: Category | "all" = "all", _catalog: Media[] = MEDIA): Promise<AiResult> {
+  const response = await fetch(OMNI_SEARCH_URL, {
+    method: "POST",
+    headers: {
+      apikey: PUBLISHABLE_KEY,
+      Authorization: `Bearer ${PUBLISHABLE_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!response.ok) throw new Error("AI search unavailable");
+  const data: { message: string; results: OmniSearchItem[] } = await response.json();
+  if (typeof data.message !== "string" || !Array.isArray(data.results)) {
+    throw new Error("Invalid AI search response");
+  }
+  const results: Media[] = data.results.map((item) => ({
+    id: item.id,
+    title: item.title,
+    category: item.format,
+    year: item.release_year ?? 0,
+    cover: item.poster_url ?? "",
+    rating: item.average_rating ?? 0,
+    genres: item.genres ?? [],
+    synopsis: item.synopsis ?? "",
+    creator: "",
+    logs: 0,
+  }));
   return {
-    intro: "Here are some movies/series/books/comics you could be looking for:",
-    results: scored,
+    intro: data.message,
+    results: category === "all" ? results : results.filter((item) => item.category === category),
   };
 }
