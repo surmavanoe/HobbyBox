@@ -4,26 +4,26 @@ import { FlatList, Pressable, Text, View, useWindowDimensions } from "react-nati
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cover, Stars } from "@/components/hb";
-import { FRIEND_LOGS, categoryLabel, mediaById, type Media } from "@/lib/data";
+import { FRIEND_LOGS, categoryLabel, mediaById, rankByRecentSearches, type Media } from "@/lib/data";
 import { CatalogStatus } from "@/components/CatalogStatus";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
 const TITLES: Record<string, string> = {
-  rec: "Media catalog",
-  friends: "🤍 Your friends liked",
-  trending: "TV Shows",
+  rec: "Based on your recent searches",
+  friends: "Liked by your friends",
+  trending: "Series popular this week",
 };
 
 export default function Grid() {
   const { section = "rec", filter = "all" } = useLocalSearchParams<{ section: string; filter: string }>();
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { openDetail, catalog } = useStore();
+  const { openDetail, catalog, recentSearches } = useStore();
   const { width } = useWindowDimensions();
   const cardW = (Math.min(width, 600) - 16 * 2 - 12 * 2) / 3;
 
-  let data: Media[] = catalog.filter((m) => filter === "all" || m.category === filter);
+  let data: Media[] = rankByRecentSearches(catalog.filter((m) => filter === "all" || m.category === filter), recentSearches);
   if (section === "friends") {
     const ids = new Set(FRIEND_LOGS.filter((l) => l.rating >= 4).map((l) => l.mediaId));
     data = [...ids].flatMap((id) => {

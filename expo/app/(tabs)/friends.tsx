@@ -73,7 +73,7 @@ export default function Friends() {
                   <Stars value={item.rating} size={14} />
                   <Text className="mt-1 text-xs text-muted-foreground">
                     {categoryLabel(m.category)} · {m.year}
-                    {item.rewatch ? " · 🔁" : ""}
+                    {item.rewatch ? " · Rewatch" : ""}
                   </Text>
                   {item.review ? <Text className="mt-2 text-sm text-foreground">“{item.review}”</Text> : null}
                 </View>

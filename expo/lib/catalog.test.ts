@@ -34,3 +34,11 @@ test("demo items without a poster get a distinct catalog item with a poster", as
   expect(map.get("a")?.id).toBe("x");
   expect(map.get("b")?.id).toBe("y");
 });
+
+test("recent searches move matching titles to the front", async () => {
+  const { rankByRecentSearches } = await import("./data");
+  const base = { creator: "", year: 0, rating: 0, genres: [], synopsis: "", logs: 0, category: "film" as const, cover: "c" };
+  const items = [{ ...base, id: "1", title: "Cozy Tea" }, { ...base, id: "2", title: "Spider Man" }];
+  expect(rankByRecentSearches(items, ["spider"]).map((m) => m.id)).toEqual(["2", "1"]);
+  expect(rankByRecentSearches(items, []).map((m) => m.id)).toEqual(["1", "2"]);
+});

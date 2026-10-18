@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
@@ -5,8 +6,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar, CategoryPills, Cover, Logo, SectionHeader, Stars, type Filter } from "@/components/hb";
 import { CatalogStatus } from "@/components/CatalogStatus";
-import { FRIEND_LOGS, categoryLabel, friendById, mediaById, type Media } from "@/lib/data";
+import { FRIEND_LOGS, categoryLabel, friendById, mediaById, rankByRecentSearches, type Media } from "@/lib/data";
 import { useStore } from "@/lib/store";
+import { useThemeColors } from "@/lib/theme";
 
 const ME_AVATAR = "https://i.pravatar.cc/150?img=68";
 
@@ -15,13 +17,14 @@ const lift = ({ pressed, hovered }: { pressed: boolean; hovered?: boolean }) => 
 
 export default function Home() {
   const insets = useSafeAreaInsets();
-  const { openDetail, catalog, catalogLoading, catalogError } = useStore();
+  const colors = useThemeColors();
+  const { openDetail, catalog, catalogLoading, catalogError, recentSearches } = useStore();
   const [filter, setFilter] = useState<Filter>("all");
   const pass = (m: Media) => filter === "all" || m.category === filter;
 
   const recommended = useMemo(
-    () => catalog.filter(pass),
-    [filter, catalog],
+    () => rankByRecentSearches(catalog.filter(pass), recentSearches),
+    [filter, catalog, recentSearches],
   );
   const friendLiked = useMemo(() => {
     const byMedia = new Map<string, string[]>();
@@ -33,14 +36,14 @@ export default function Home() {
       });
   }, [filter, catalog]);
   const trending = useMemo(
-    () => catalog.filter((m) => m.category === "tv").filter(pass),
+    () => catalog.filter((m) => m.category === "tv").filter(pass).sort((a, b) => b.rating - a.rating),
     [filter, catalog],
   );
 
   const sections = [
-    { key: "rec", title: `Media catalog · ${recommended.length} titles`, empty: recommended.length === 0 },
-    { key: "friends", title: "🤍 Movies your friends liked", empty: friendLiked.length === 0 },
-    { key: "trending", title: "TV Shows", empty: trending.length === 0 },
+    { key: "rec", icon: "bulb-outline", title: "Based on your recent searches:", empty: recommended.length === 0 },
+    { key: "friends", icon: "heart-outline", title: "Liked by your friends", empty: friendLiked.length === 0 },
+    { key: "trending", icon: "tv-outline", title: "Series popular this week", empty: trending.length === 0 },
   ];
 
   return (
@@ -60,7 +63,7 @@ export default function Home() {
         ListHeaderComponent={<View className="py-2"><CategoryPills value={filter} onChange={setFilter} /><CatalogStatus /></View>}
         renderItem={({ item: s }) => (
           <View className="mt-4">
-            <SectionHeader title={s.title} onPress={() => router.push({ pathname: "/grid/[section]", params: { section: s.key, filter } })} />
+            <SectionHeader icon={s.icon} title={s.title} onPress={() => router.push({ pathname: "/grid/[section]", params: { section: s.key, filter } })} />
             {s.empty ? (
               <View className="mx-4 rounded-2xl border border-border bg-card p-4">
                 <Text className="text-muted-foreground">Nothing here for this category yet.</Text>
@@ -78,7 +81,10 @@ export default function Home() {
                 renderItem={({ item }) => (
                   <Pressable onPress={() => openDetail(item.id)} className="w-[124px]" style={lift}>
                     <View style={{ transform: [{ perspective: 600 }, { rotateY: "-8deg" }] }}>
-                      <Cover media={item} className="h-[180px] w-[124px]" />
+                      <Cover media={item} className="h-[180px] w-[124px] border-primary/40" />
+                      <View className="absolute bottom-2 left-2 right-2 items-center rounded-md border border-primary/60 bg-background/80 px-1 py-0.5">
+                        <Text className="text-[10px] font-semibold text-foreground" numberOfLines={1}>{item.title}</Text>
+                      </View>
                     </View>
                     {item.rating > 0 ? <View className="mt-2">
                       <Stars value={item.rating} />
@@ -86,8 +92,8 @@ export default function Home() {
                     <Text className="mt-1 text-sm font-semibold text-foreground" numberOfLines={1}>
                       {item.title}
                     </Text>
-                    <Text className="text-xs text-muted-foreground">
-                      {categoryLabel(item.category)}
+                    <Text className="text-xs text-muted-foreground" numberOfLines={1}>
+                      {[item.genres[0], categoryLabel(item.category), item.rating > 0 ? item.rating.toFixed(1) : null].filter(Boolean).join(" · ")}
                     </Text>
                   </Pressable>
                 )}
@@ -111,7 +117,7 @@ export default function Home() {
                         ))}
                       </View>
                       <View className="absolute bottom-2 right-2 rounded-full bg-background/90 px-2 py-0.5">
-                        <Text className="text-[10px] font-bold text-foreground">Friend 🧡</Text>
+                        <View className="flex-row items-center gap-1"><Text className="text-[10px] font-bold text-foreground">Friend</Text><Ionicons name="heart" size={10} color={colors.primary} /></View>
                       </View>
                     </View>
                     <Text className="mt-2 text-sm font-semibold text-foreground" numberOfLines={1}>
@@ -128,10 +134,20 @@ export default function Home() {
                 keyExtractor={(m) => m.id}
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                   <Pressable onPress={() => openDetail(item.id)} className="w-[140px]" style={lift}>
                     <View>
-                      <Cover media={item} className="h-[200px] w-[140px]" />
+                      <Cover media={item} className="h-[200px] w-[140px] border-primary/40" />
+                      <View className="absolute left-2 top-2 flex-row items-center gap-1 rounded-md bg-background/85 px-2 py-1">
+                        <Ionicons name="flame" size={12} color={colors.primary} />
+                        <Text className="text-[11px] font-bold text-foreground">#{index + 1} Trending</Text>
+                      </View>
+                      {item.rating > 0 ? (
+                        <View className="absolute bottom-2 left-2 flex-row items-center gap-1 rounded-md bg-background/85 px-2 py-1">
+                          <Ionicons name="star" size={11} color={colors.primary} />
+                          <Text className="text-[11px] font-bold text-foreground">{item.rating.toFixed(1)}</Text>
+                        </View>
+                      ) : null}
                     </View>
                     <Text className="mt-2 text-sm font-semibold text-foreground" numberOfLines={1}>
                       {item.title}
