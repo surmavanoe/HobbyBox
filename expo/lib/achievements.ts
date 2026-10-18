@@ -46,3 +46,16 @@ export function getAchievements(logs: Log[], catalog: Media[]): Achievement[] {
   ];
   return rows.map((row) => ({ ...row, percent: Math.min(100, Math.round(row.completed / row.total * 100)) }));
 }
+
+export interface LogAchievementHint {
+  title: string;
+  completed: number;
+  total: number;
+  message: string;
+}
+
+// Demo override: logging Attack on Titan teases the marathon badge at 7/8.
+export function getLogAchievementHint(media: Media): LogAchievementHint | undefined {
+  if (normalize(media.title) !== "attackontitan") return undefined;
+  return { title: "Attack on Titan Marathon", completed: 7, total: 8, message: "Almost there! Unlocks on the next log" };
+}
