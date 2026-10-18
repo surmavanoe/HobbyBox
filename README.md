@@ -48,8 +48,8 @@ Log and review what you watch or read, build a profile across five formats, and 
 Use Node.js 22+ and [Bun](https://bun.sh). Bun is the package manager used by the committed frontend lockfile and test suite.
 
 ```sh
-git clone https://github.com/surmavanoe/mobile-app-builder.git
-cd mobile-app-builder/expo
+git clone https://github.com/surmavanoe/HobbyBox.git
+cd HobbyBox/expo
 bun install --frozen-lockfile
 bun run dev
 ```
@@ -78,13 +78,19 @@ The GitHub Actions workflow runs type checking, tests and a web export without p
 | Discovery | A Supabase Edge Function combines semantic search with deterministic format, genre, year, length and social filters. |
 | Verification | Bun tests, TypeScript and an Expo web export. |
 
-```text
-expo/                  App screens, components, local state and tests
-supabase/              Edge Function, schema snapshot and migration files
-backend/               Catalog and demo-social data tooling
-docs/backend-api.md    Backend request/response contract
-docs/showcase.md       Short demo and portfolio description
-```
+| Path | Contents |
+| --- | --- |
+| `.github/workflows/` | Automated type checks, tests and web builds. |
+| `.lovable/plan/` | Interface design and implementation notes. |
+| `backend/` | Catalog import, embedding and demo social-data scripts. |
+| `docs/` | Backend API documentation, showcase materials and mascot artwork. |
+| `expo/` | Mobile app screens, components, local state and tests. |
+| `src/integrations/supabase/` | Generated Supabase client, database types and preview authentication storage. |
+| `supabase/` | AI search function, database schema and migrations. |
+| `.env` | Public Supabase connection settings for the generated web integration. |
+| `.gitignore` | Dependencies, local credentials and generated files excluded from Git. |
+| `AGENTS.md` | Repository architecture and development guidelines. |
+| `roadmap.md` | Feature progress and planned improvements. |
 
 AI discovery sends the prompt to `omni-search`; server-side credentials and ranking stay on the backend. This is semantic catalog search with supported filters, rather than an unrestricted conversational agent.
 
