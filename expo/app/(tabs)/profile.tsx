@@ -2,13 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, withRepeat, withTiming, type SharedValue } from "react-native-reanimated";
-import { FlatList, Image, Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
+import { FlatList, Image, Modal, Pressable, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryIcon, Cover, ORANGE, Stars } from "@/components/hb";
 import { CATEGORIES, FRIENDS, categoryLabel, mediaById, type Category } from "@/lib/data";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
+import { ProfileAchievements, ProfileBadges } from "@/components/ProfileAchievements";
+import { RecentReviewsSheet } from "@/components/RecentReviewsSheet";
+import { Button } from "@/components/ui/Button";
 
 const ME_AVATAR = "https://i.pravatar.cc/150?img=68";
 const BANNER = "https://is1-ssl.mzstatic.com/image/thumb/Video126/v4/d8/ab/12/d8ab1255-b426-228e-b0b9-bf9226f56b28/6a9bf4da-a829-4291-9c77-c26853dbb1b1_FBJ-S1-1_3000x3000_Season_Master_Key_Art.jpg/1200x600bb.jpg";
@@ -95,6 +98,8 @@ export default function Profile() {
   const { width, height } = useWindowDimensions();
   const { myLogs, account, setFavorite, openLog, favorites, watchlist, openDetail, catalog } = useStore();
   const [swap, setSwap] = useState<Category | null>(null);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
   const bannerH = Math.round(height * 0.14);
   const pentSize = Math.min(width - 32, 360);
   const username = account?.username ?? "USERNAME";
@@ -102,7 +107,7 @@ export default function Profile() {
 
   return (
     <View className="flex-1 bg-background">
-      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+      <FlatList data={[]} renderItem={() => null} contentContainerStyle={{ paddingBottom: 32 }} ListHeaderComponent={<>
         <View style={{ height: bannerH }} className="overflow-hidden rounded-b-3xl bg-card">
           <Image source={{ uri: BANNER }} style={{ width: "100%", height: "100%" }} resizeMode="cover" />
           <View className="absolute inset-0 bg-black/30" />
@@ -129,6 +134,7 @@ export default function Profile() {
             <Text className="text-base font-semibold text-foreground">Friends</Text>
             <Text className="text-base font-bold text-primary">{FRIENDS.length}</Text>
           </Pressable>
+          <ProfileBadges onPress={() => setShowAchievements(true)} />
         </View>
         {!account ? (
           <Pressable onPress={() => router.push("/auth")} className="mx-4 mt-3 min-h-[44px] flex-row items-center rounded-2xl border border-border bg-card px-4">
@@ -142,7 +148,12 @@ export default function Profile() {
           <Pentagon size={pentSize} onSlot={setSwap} />
         </View>
 
-        <Text className="mt-8 px-4 text-base font-bold text-foreground">Last Reviewed:</Text>
+        <ProfileAchievements visible={showAchievements} onOpen={() => setShowAchievements(true)} onClose={() => setShowAchievements(false)} />
+
+        <View className="mt-5 flex-row items-center justify-between px-4">
+          <Text className="flex-1 text-base font-bold text-foreground">Last Reviewed:</Text>
+          <Button variant="ghost" className="px-0" onPress={() => setShowReviews(true)} accessibilityLabel="See more reviews">See more</Button>
+        </View>
         {myLogs.length === 0 ? (
           <View className="mx-4 mt-2 rounded-2xl border border-border bg-card p-4">
             <Text className="text-muted-foreground">Your reviews will show up here.</Text>
@@ -153,7 +164,7 @@ export default function Profile() {
         ) : (
           <FlatList
             horizontal
-            data={myLogs}
+            data={myLogs.filter((log) => !!mediaById(log.mediaId)?.cover).slice(0, 5)}
             keyExtractor={(l) => l.id}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 16, gap: 12, paddingTop: 10 }}
@@ -201,7 +212,9 @@ export default function Profile() {
             }}
           />
         )}
-      </ScrollView>
+      </>} />
+
+      <RecentReviewsSheet visible={showReviews} onClose={() => setShowReviews(false)} />
 
       <Modal visible={!!swap} transparent animationType="slide" onRequestClose={() => setSwap(null)}>
         <View className="flex-1 justify-end bg-black/60">

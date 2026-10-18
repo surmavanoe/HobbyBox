@@ -1,4 +1,3 @@
-# Catalog connection
 # Profile achievements
 - [ ] Add achievement cards below Quintuple and the two reference icons beside Friends.
 - [ ] Add working See more views for achievements and recent reviews.
