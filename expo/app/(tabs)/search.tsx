@@ -79,7 +79,7 @@ export default function Search() {
     setAi(null); setError(false); setLoading(false); setNeedSignIn(false); setLastPrompt("");
   };
 
-  const hasFilters = filters.category !== null || filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
+  const hasFilters = filters.categories.length > 0 || filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
   const source = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query || hasFilters ? searchLocal(query, "all", catalog) : [];
   const data = applySearchFilters(source, filters);
 
