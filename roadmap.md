@@ -30,4 +30,5 @@
 
 # Public AI search
 - [x] Replace local discovery with the existing omni-search POST and map backend fields without UI or backend changes.
-- [x] Test request headers, result mapping and failures; verify live public search in Quick view.
+- [x] Test request headers, result mapping and failures; verify live public search in Quick view.## Log achievement hint
+- [x] Show "Attack on Titan Marathon" card (7/8) between rewatch and Save log when logging Attack on Titan; verified in Quick view.
