@@ -102,7 +102,7 @@ export default function Profile() {
   const [showReviews, setShowReviews] = useState(false);
   const bannerH = Math.round(height * 0.14);
   const pentSize = Math.min(width - 32, 360);
-  const username = account?.username ?? "USERNAME";
+  const username = account?.username ?? "Guest";
   const split = Math.ceil(username.length / 2);
 
   return (
@@ -136,13 +136,14 @@ export default function Profile() {
           </Pressable>
           <ProfileBadges onPress={() => setShowAchievements(true)} />
         </View>
-        {!account ? (
+        {!account?.token ? (
           <Pressable onPress={() => router.push("/auth")} className="mx-4 mt-3 min-h-[44px] flex-row items-center rounded-2xl border border-border bg-card px-4">
-            <Text className="flex-1 text-sm text-muted-foreground">Create an account to save your profile</Text>
-            <Text className="font-semibold text-primary">Sign up</Text>
+            <Text className="flex-1 text-sm text-muted-foreground">Sign in for personal AI recommendations</Text>
+            <Text className="font-semibold text-primary">Sign in</Text>
           </Pressable>
         ) : null}
 
+        <Text className="mx-4 mt-3 text-xs text-muted-foreground">Demo profile · Logs and watchlist are saved on this device.</Text>
         <Text className="mt-2 text-center text-base font-bold tracking-widest text-primary">Quintuple</Text>
         <View className="items-center">
           <Pentagon size={pentSize} onSlot={setSwap} />

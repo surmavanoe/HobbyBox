@@ -4,3 +4,10 @@ node_modules/
 backend/.env
 backend/node_modules/
 supabase/.temp/
+
+# Local credentials and generated output
+.env.local
+.env.*.local
+expo/.env
+expo/dist/
+coverage/

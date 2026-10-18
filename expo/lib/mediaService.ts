@@ -121,13 +121,22 @@ export async function aiDiscover(prompt: string, category: Category | "all" = "a
 const AUTH_URL = "https://smeucssdhwbfoiaethcm.supabase.co/auth/v1";
 
 // Real account sign-in; the access token is kept in memory only.
-export async function signInAccount(email: string, password: string, signUp = false): Promise<string> {
+export async function signInAccount(email: string, password: string, signUp = false): Promise<string | null> {
   const response = await fetch(signUp ? `${AUTH_URL}/signup` : `${AUTH_URL}/token?grant_type=password`, {
     method: "POST",
     headers: { apikey: PUBLISHABLE_KEY, "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok || !data.access_token) throw new Error(signUp ? "Sign up failed" : "Sign in failed");
-  return data.access_token;
+  const data = (await response.json().catch(() => ({}))) ?? {};
+  if (!response.ok) {
+    if (response.status === 429) throw new Error("Too many attempts. Please wait a moment and try again.");
+    if (!signUp && (response.status === 400 || response.status === 401)) {
+      throw new Error("Check your email and password, and confirm your email before signing in.");
+    }
+    throw new Error(signUp ? "Couldn't create the account. Please try again or sign in." : "Sign in is unavailable right now. Please try again.");
+  }
+  if (typeof data.access_token === "string" && data.access_token) return data.access_token;
+  // Email confirmation can create a user successfully without opening a session.
+  if (signUp && typeof data.id === "string" && data.id) return null;
+  throw new Error("The sign-in response was incomplete. Please try again.");
 }

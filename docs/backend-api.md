@@ -292,9 +292,14 @@ the app's `Media` shape:
 - `synopsis` -> `synopsis`
 
 Friend/personal filters ("my friends rated 4+", "books I haven't logged") need a
-Supabase Auth user JWT in `Authorization`. The Expo app currently persists
-account state in AsyncStorage, so those filters require adding Supabase Auth
-and writing library/reviews to Supabase first.
+Supabase Auth user JWT in `Authorization`. The Expo app signs in over REST and
+keeps the token in memory only; signing in again is required after a restart.
+Account display details persist in AsyncStorage, but a stored profile is not an
+active session. Signup may require email confirmation before a token is issued.
+
+Logs, reviews, favorites and watchlists created in the Expo UI remain local.
+They are not written to Supabase yet, so AI personal-history filters use existing
+backend entries, and the sample Friends feed is separate from backend friendships.
 
 ## Secrets
 
