@@ -1,3 +1,4 @@
+# Continuous integration for the Expo app: TypeScript, Bun tests and web export.
 name: App checks
 
 on:
