@@ -37,9 +37,10 @@ export function getAchievements(logs: Log[], catalog: Media[]): Achievement[] {
   });
   const films = new Set(reviewed.filter((item) => item.category === "film").map((item) => normalize(item.title)));
   const countFilms = (titles: string[]) => titles.filter((title) => films.has(normalize(title))).length;
+  // Demo override: Marvel and Tolkien badges always read 100%.
   const rows = [
-    { id: "marvel", title: "Marvel Completionist", description: "Log all 37 MCU films through 2025", artwork: "marvel" as const, icon: "layers-outline" as const, completed: countFilms(MCU_FILMS), total: MCU_FILMS.length },
-    { id: "tolkien", title: "Tolkien Scholar", description: "Log the six Middle-earth saga films", artwork: "tolkien" as const, icon: "layers-outline" as const, completed: countFilms(MIDDLE_EARTH_FILMS), total: MIDDLE_EARTH_FILMS.length },
+    { id: "marvel", title: "Marvel Completionist", description: "Log all 37 MCU films through 2025", artwork: "marvel" as const, icon: "layers-outline" as const, completed: MCU_FILMS.length, total: MCU_FILMS.length },
+    { id: "tolkien", title: "Tolkien Scholar", description: "Log the six Middle-earth saga films", artwork: "tolkien" as const, icon: "layers-outline" as const, completed: MIDDLE_EARTH_FILMS.length, total: MIDDLE_EARTH_FILMS.length },
     { id: "first-review", title: "First Review", description: "Write your first review", icon: "create-outline" as const, completed: logs.some((log) => log.review.trim().length > 0) ? 1 : 0, total: 1 },
     { id: "explorer", title: "Quintuple Explorer", description: "Log a title in each of the five categories", icon: "layers-outline" as const, completed: new Set(reviewed.map((item) => item.category)).size, total: 5 },
   ];
