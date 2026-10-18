@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -58,6 +58,12 @@ export default function Search() {
       setLoading(false);
     }
   };
+
+  // After signing in, re-run the friend question that was waiting on sign-in.
+  useEffect(() => {
+    if (account?.token && needSignIn && lastPrompt) void runAi(lastPrompt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.token]);
 
   const hasFilters = filters.category !== null || filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
   const source = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query || hasFilters ? searchLocal(query, "all", catalog) : [];
