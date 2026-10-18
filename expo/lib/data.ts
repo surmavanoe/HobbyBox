@@ -85,11 +85,31 @@ export const MEDIA: Media[] = [
 ];
 
 let databaseCatalog: Media[] = [];
+let posterSubstitutes = new Map<string, Media>();
 export function setDatabaseCatalog(items: Media[]) {
   databaseCatalog = items;
+  posterSubstitutes = buildPosterSubstitutes(MEDIA, items);
+}
+// Demo items without a poster are swapped for a distinct same-category catalog item that has one.
+export function buildPosterSubstitutes(seed: Media[], catalog: Media[]) {
+  const map = new Map<string, Media>();
+  const used = new Set(seed.map((m) => m.title.toLowerCase()));
+  for (const m of seed) {
+    if (m.cover) continue;
+    const pick = catalog.find((c) => c.cover && !used.has(c.title.toLowerCase()) && c.category === m.category)
+      ?? catalog.find((c) => c.cover && !used.has(c.title.toLowerCase()));
+    if (pick) { used.add(pick.title.toLowerCase()); map.set(m.id, pick); }
+  }
+  return map;
 }
 // Legacy demo IDs still resolve so saved logs and favorites are not lost.
-export const mediaById = (id: string) => databaseCatalog.find((m) => m.id === id) ?? MEDIA.find((m) => m.id === id);
+export const mediaById = (id: string) => {
+  const db = databaseCatalog.find((m) => m.id === id);
+  if (db) return db;
+  const seed = MEDIA.find((m) => m.id === id);
+  if (seed && !seed.cover) return posterSubstitutes.get(id) ?? seed;
+  return seed;
+};
 
 export interface Friend {
   id: string;
