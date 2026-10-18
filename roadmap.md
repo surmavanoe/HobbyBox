@@ -1,4 +1,6 @@
-# Profile achievements
+# Badge sharpness
+- [x] Regenerate Marvel and Tolkien badges at high resolution and load them locally.
+- [ ] Render badges larger with thicker line art and verify on the profile.
 - [x] Add achievement cards below Quintuple and the two reference icons beside Friends.
 - [x] Add working See more views for achievements and recent reviews.
 - [x] Test saved-log progress and verify the profile flow in Quick view.
