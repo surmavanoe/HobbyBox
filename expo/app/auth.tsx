@@ -84,7 +84,7 @@ export default function Auth() {
             </Pressable>
           </View>
 
-          {account ? (
+          {account?.token ? (
             <View className="mt-10 items-center gap-4">
               <View className="h-[110px] w-[110px] items-center justify-center rounded-full border-2 border-primary bg-card">
                 <Ionicons name="person" size={52} color={colors.mutedForeground} />
