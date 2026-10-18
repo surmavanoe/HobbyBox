@@ -23,4 +23,4 @@
 
 # Public AI search
 - [x] Replace local discovery with the existing omni-search POST and map backend fields without UI or backend changes.
-- [ ] Test request headers, result mapping and failures; verify live public search in Quick view.
+- [x] Test request headers, result mapping and failures; verify live public search in Quick view.
