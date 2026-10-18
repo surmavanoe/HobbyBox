@@ -4,6 +4,7 @@ import { useState } from "react";
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { signInAccount } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
 
@@ -38,14 +39,23 @@ export default function Auth() {
   const [err, setErr] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const submit = () => {
+  const [busy, setBusy] = useState(false);
+  const submit = async () => {
     if (!/^\S+@\S+\.\S+$/.test(email)) return setErr("Enter a valid email.");
     if (mode === "up" && username.trim().length < 3) return setErr("Username needs at least 3 characters.");
     if (pw.length < 6) return setErr("Password needs at least 6 characters.");
     if (mode === "up" && pw !== pw2) return setErr("Passwords don't match.");
     setErr("");
-    signUp({ email, username: mode === "up" ? username.trim() : email.split("@")[0] });
-    router.back();
+    setBusy(true);
+    try {
+      const token = await signInAccount(email.trim(), pw, mode === "up");
+      signUp({ email: email.trim(), username: mode === "up" ? username.trim() : email.split("@")[0], token });
+      router.back();
+    } catch {
+      setErr(mode === "up" ? "Couldn't create the account. Try signing in instead." : "Wrong email or password.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const Plus = ({ style }: { style: object }) => (
@@ -117,7 +127,7 @@ export default function Auth() {
               <Field label="Password" value={pw} onChange={setPw} secure />
               {mode === "up" ? <Field label="Repeat Password" value={pw2} onChange={setPw2} secure /> : null}
               {err ? <Text className="text-center text-destructive">{err}</Text> : null}
-              <Pressable onPress={submit} className="min-h-[52px] items-center justify-center rounded-full bg-primary active:opacity-80">
+              <Pressable onPress={submit} disabled={busy} className="min-h-[52px] items-center justify-center rounded-full bg-primary active:opacity-80">
                 <Text className="text-base font-bold text-primary-foreground">{mode === "up" ? "Sign up" : "Sign in"}</Text>
               </Pressable>
               <Pressable onPress={() => { setMode(mode === "up" ? "in" : "up"); setErr(""); }} className="mt-4 min-h-[44px] items-center justify-center">

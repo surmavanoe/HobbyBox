@@ -7,6 +7,7 @@ import { fetchCatalog } from "./mediaService";
 interface Account {
   email: string;
   username: string;
+  token?: string;
 }
 
 interface StoreValue {
@@ -78,7 +79,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    AsyncStorage.setItem(KEY, JSON.stringify({ account, myLogs, favorites, watchlist })).catch(() => {});
+    AsyncStorage.setItem(KEY, JSON.stringify({ account: account ? { email: account.email, username: account.username } : null, myLogs, favorites, watchlist })).catch(() => {});
   }, [ready, account, myLogs, favorites, watchlist]);
 
   const addLog = useCallback<StoreValue["addLog"]>((l) => {

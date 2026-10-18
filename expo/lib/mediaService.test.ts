@@ -32,11 +32,18 @@ test("maps backend media fields and message without local ranking or match badge
   }] });
 });
 
-test("nullable backend metadata uses existing empty media fallbacks", async () => {
+test("results without a poster are hidden", async () => {
   spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ message: "Matches", results: [{
     ...result, release_year: null, poster_url: null, average_rating: null, genres: null, synopsis: null,
   }] }));
-  expect((await aiDiscover("notebook")).results[0]).toMatchObject({ year: 0, cover: "", rating: 0, genres: [], synopsis: "" });
+  expect((await aiDiscover("notebook")).results).toEqual([]);
+});
+
+test("signed-in token is sent and friend context is mapped", async () => {
+  const request = spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ message: "M", results: [{ ...result, friend_name: "Maya", friend_rating: 5 }] }));
+  const out = await aiDiscover("drama my friends rated 5 stars", "all", [], "user-token");
+  expect(new Headers(request.mock.calls[0][1]?.headers).get("Authorization")).toBe("Bearer user-token");
+  expect(out.results[0].friendNote).toBe("Maya gave this 5 stars");
 });
 
 test("unauthenticated friend search failure propagates instead of generating local matches", async () => {

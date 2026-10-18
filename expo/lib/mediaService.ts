@@ -15,7 +15,7 @@ export async function fetchCatalog(): Promise<Media[]> {
     });
     if (!response.ok) throw new Error("Catalog unavailable");
     const rows: CatalogRow[] = await response.json();
-    items.push(...rows.map(mapCatalogRow));
+    items.push(...rows.map(mapCatalogRow).filter((m) => m.cover));
     if (rows.length < pageSize) return items;
   }
 }
@@ -74,6 +74,8 @@ interface OmniSearchItem {
   average_rating: number | null;
   genres: string[] | null;
   synopsis: string | null;
+  friend_name?: string | null;
+  friend_rating?: number | null;
 }
 
 export interface AiResult {
@@ -82,12 +84,12 @@ export interface AiResult {
 }
 
 // Retain the existing call signature; the local catalog no longer drives AI results.
-export async function aiDiscover(prompt: string, category: Category | "all" = "all", _catalog: Media[] = MEDIA): Promise<AiResult> {
+export async function aiDiscover(prompt: string, category: Category | "all" = "all", _catalog: Media[] = MEDIA, accessToken?: string): Promise<AiResult> {
   const response = await fetch(OMNI_SEARCH_URL, {
     method: "POST",
     headers: {
       apikey: PUBLISHABLE_KEY,
-      Authorization: `Bearer ${PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${accessToken ?? PUBLISHABLE_KEY}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ prompt }),
@@ -97,7 +99,7 @@ export async function aiDiscover(prompt: string, category: Category | "all" = "a
   if (typeof data.message !== "string" || !Array.isArray(data.results)) {
     throw new Error("Invalid AI search response");
   }
-  const results: Media[] = data.results.map((item) => ({
+  const results: Media[] = data.results.filter((item) => item.poster_url).map((item) => ({
     id: item.id,
     title: item.title,
     category: item.format,
@@ -108,9 +110,24 @@ export async function aiDiscover(prompt: string, category: Category | "all" = "a
     synopsis: item.synopsis ?? "",
     creator: "",
     logs: 0,
+    ...(item.friend_name && item.friend_rating ? { friendNote: `${item.friend_name} gave this ${item.friend_rating} star${item.friend_rating === 1 ? "" : "s"}` } : {}),
   }));
   return {
     intro: data.message,
     results: category === "all" ? results : results.filter((item) => item.category === category),
   };
+}
+
+const AUTH_URL = "https://smeucssdhwbfoiaethcm.supabase.co/auth/v1";
+
+// Real account sign-in; the access token is kept in memory only.
+export async function signInAccount(email: string, password: string, signUp = false): Promise<string> {
+  const response = await fetch(signUp ? `${AUTH_URL}/signup` : `${AUTH_URL}/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: PUBLISHABLE_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.access_token) throw new Error(signUp ? "Sign up failed" : "Sign in failed");
+  return data.access_token;
 }
