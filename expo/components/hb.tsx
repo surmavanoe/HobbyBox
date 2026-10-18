@@ -34,10 +34,10 @@ export function Cover({ media, className, rounded = "rounded-xl" }: { media: Med
   );
 }
 
-export function Stars({ value, size = 12 }: { value: number; size?: number }) {
+export function Stars({ value, size = 12, showValue = false }: { value: number; size?: number; showValue?: boolean }) {
   const colors = useThemeColors();
   return (
-    <View className="flex-row" style={{ gap: 1 }}>
+    <View className="flex-row items-center" style={{ gap: 1 }}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Ionicons
           key={i}
@@ -46,6 +46,7 @@ export function Stars({ value, size = 12 }: { value: number; size?: number }) {
           color={value >= i - 0.5 ? colors.primary : colors.mutedForeground}
         />
       ))}
+      {showValue && value > 0 ? <Text className="ml-1.5 text-xs font-semibold text-muted-foreground">{value.toFixed(1)}</Text> : null}
     </View>
   );
 }
@@ -70,18 +71,20 @@ export function CategoryIcon({ category, size = 12, color }: { category: Categor
 
 export type Filter = Category | "all";
 
-export function CategoryPills({ value, onChange }: { value: Filter; onChange: (f: Filter) => void }) {
+export function CategoryPills({ values, onChange }: { values: Filter[]; onChange: (f: Filter[]) => void }) {
   const colors = useThemeColors();
   const items: { key: Filter; label: string; icon?: string }[] = [
     { key: "all", label: "All" },
     ...CATEGORIES.map((c) => ({ key: c.key as Filter, label: c.label, icon: c.icon })),
   ];
+  const toggle = (key: Filter) =>
+    key === "all" ? onChange([]) : onChange(values.includes(key) ? values.filter((v) => v !== key) : [...values, key]);
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}>
       {items.map((it) => {
-        const active = it.key === value;
+        const active = it.key === "all" ? values.length === 0 : values.includes(it.key);
         return (
-          <Pressable key={it.key} onPress={() => onChange(it.key)} className="min-h-[44px] justify-center">
+          <Pressable key={it.key} onPress={() => toggle(it.key)} className="min-h-[44px] justify-center">
             <View className={cn("flex-row items-center gap-1.5 rounded-full border px-4 py-2", active ? "border-primary bg-primary/10" : "border-border bg-card")}>
               {it.icon ? <Ionicons name={it.icon as never} size={14} color={active ? colors.primary : colors.mutedForeground} /> : null}
               <Text className={cn("text-sm font-semibold", active ? "text-primary" : "text-muted-foreground")}>{it.label}</Text>
