@@ -1,14 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
+import { FlatList, Image, KeyboardAvoidingView, Modal, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { CategoryPills, Cover, StarPicker, type Filter } from "@/components/hb";
 import { CatalogStatus } from "@/components/CatalogStatus";
+import { getLogAchievementHint } from "@/lib/achievements";
 import { categoryLabel, mediaById, type Media } from "@/lib/data";
 import { searchLocal } from "@/lib/mediaService";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
+
+import aotBadge from "@/assets/aot-badge.png";
 
 export function LogModal() {
   const { logModal, closeLog, addLog, catalog, catalogLoading, catalogError } = useStore();
@@ -39,6 +42,7 @@ export function LogModal() {
     [query, cats, catalog],
   );
   const reLabel = selected && (selected.category === "book" || selected.category === "manga") ? "Re-read" : "Re-watch";
+  const achievementHint = selected ? getLogAchievementHint(selected) : undefined;
 
   const save = () => {
     if (!selected || rating === 0) return;
@@ -139,6 +143,20 @@ export function LogModal() {
                       <Text className="ml-3 flex-1 text-base text-foreground">{reLabel}</Text>
                       <Switch value={rewatch} onValueChange={setRewatch} trackColor={{ true: colors.primary, false: colors.border }} thumbColor="#ffffff" />
                     </View>
+                    {achievementHint ? (
+                      <View className="flex-row items-center gap-4 rounded-2xl border border-border bg-card px-4 py-4">
+                        <Image source={aotBadge} style={{ width: 64, height: 64 }} resizeMode="contain" accessibilityLabel="Achievement badge" />
+                        <View className="flex-1 gap-2">
+                          <Text className="text-base font-bold text-foreground">{achievementHint.title}</Text>
+                          <View className="h-2 overflow-hidden rounded-full bg-border">
+                            <View className="h-full rounded-full bg-primary" style={{ width: `${(achievementHint.completed / achievementHint.total) * 100}%` }} />
+                          </View>
+                          <Text className="text-sm text-muted-foreground">
+                            {achievementHint.completed}/{achievementHint.total} {achievementHint.message}
+                          </Text>
+                        </View>
+                      </View>
+                    ) : null}
                     <Pressable
                       onPress={save}
                       disabled={rating === 0 || saved}
