@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, Switch, Text, TextInput, View } from "react-native";
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Cover, Stars } from "@/components/hb";
@@ -65,6 +65,19 @@ export default function Search() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account?.token]);
 
+  // With AI on, typing runs the AI search after a short pause.
+  useEffect(() => {
+    if (!aiOn || !query.trim() || query === lastPrompt) return;
+    const t = setTimeout(() => void runAi(query), 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, aiOn]);
+
+  const resetAll = () => {
+    setQuery(""); setFilters({ ...EMPTY_SEARCH_FILTERS }); setMode("browse"); setAiOn(false);
+    setAi(null); setError(false); setLoading(false); setNeedSignIn(false); setLastPrompt("");
+  };
+
   const hasFilters = filters.category !== null || filters.yearRange !== null || filters.genre !== null || filters.ratingOrder !== null;
   const source = catalogLoading || catalogError ? [] : mode === "ai" ? (loading || error ? [] : ai?.results ?? []) : query || hasFilters ? searchLocal(query, "all", catalog) : [];
   const data = applySearchFilters(source, filters);
@@ -87,13 +100,19 @@ export default function Search() {
                   <Ionicons name="options-outline" size={22} color={hasFilters ? colors.primary : colors.foreground} />
                 </Pressable>
               </View>
-              <View className="mx-4 min-h-[48px] flex-row items-center rounded-full border border-border bg-card pl-4 pr-1">
+              <View className="mx-4 flex-row items-center gap-2">
+              {query || hasFilters || mode === "ai" || aiOn ? (
+                <Pressable onPress={resetAll} className="h-[48px] w-[48px] items-center justify-center rounded-full border border-border bg-card active:opacity-80" accessibilityLabel="Reset search">
+                  <Ionicons name="refresh" size={20} color={colors.foreground} />
+                </Pressable>
+              ) : null}
+              <View className="min-h-[48px] flex-1 flex-row items-center rounded-full border border-border bg-card pl-4 pr-1">
                 <Ionicons name="search" size={18} color={colors.mutedForeground} />
                 <TextInput
                   value={query}
                   onChangeText={(t) => {
                     setQuery(t);
-                    if (mode === "ai") setMode("browse");
+                    if (!aiOn && mode === "ai") setMode("browse");
                   }}
                   returnKeyType="search"
                   onSubmitEditing={() => { if (aiOn) runAi(query); }}
@@ -101,10 +120,12 @@ export default function Search() {
                   placeholderTextColor={colors.mutedForeground}
                   className="ml-2 flex-1 py-3 text-base text-foreground"
                 />
-                <View className="min-h-[44px] flex-row items-center gap-2 px-2">
-                  <Text className={cn("text-sm font-bold", aiOn ? "text-primary" : "text-muted-foreground")}>AI</Text>
-                  <Switch value={aiOn} onValueChange={setAiOn} accessibilityLabel="AI switch" trackColor={{ false: colors.muted, true: colors.primary }} thumbColor={colors.foreground} ios_backgroundColor={colors.muted} />
-                </View>
+                <Pressable onPress={() => { const next = !aiOn; setAiOn(next); if (next && query.trim()) runAi(query); else if (!next && mode === "ai") setMode("browse"); }} className="min-h-[44px] min-w-[52px] items-center justify-center" accessibilityLabel="AI search" accessibilityState={{ selected: aiOn }}>
+                  <View className={cn("h-[36px] min-w-[48px] items-center justify-center rounded-full px-3", aiOn ? "bg-primary" : "bg-muted")}>
+                    <Text className={cn("text-sm font-bold", aiOn ? "text-primary-foreground" : "text-muted-foreground")}>AI</Text>
+                  </View>
+                </Pressable>
+              </View>
               </View>
               <CatalogStatus />
               {mode === "browse" && (query || hasFilters) && !catalogLoading && !catalogError ? <Text className="px-4 text-sm text-muted-foreground">{data.length} {data.length === 1 ? "title" : "titles"}{filters.yearRange ? ` · ${formatYearRange(filters.yearRange)}` : ""}{filters.genre ? ` · ${filters.genre}` : ""}{filters.ratingOrder ? ` · ${filters.ratingOrder === "best" ? "Best to worst" : "Worst to best"}` : ""}</Text> : null}
