@@ -5,7 +5,7 @@ import Animated, { Easing, cancelAnimation, useAnimatedStyle, useSharedValue, wi
 import { FlatList, Image, Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Cover, ORANGE, Stars } from "@/components/hb";
+import { CategoryIcon, Cover, ORANGE, Stars } from "@/components/hb";
 import { CATEGORIES, FRIENDS, categoryLabel, mediaById, type Category } from "@/lib/data";
 import { useStore } from "@/lib/store";
 import { useThemeColors } from "@/lib/theme";
