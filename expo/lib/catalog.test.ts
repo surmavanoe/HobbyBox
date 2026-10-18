@@ -24,3 +24,13 @@ test("database poster, year and genres override demo values", () => {
   const item = mapCatalogRow({ id: "u", title: "X", format: "film", synopsis: null, external_id: null, poster_url: "https://p/x.jpg", release_year: 1999, genres: ["Drama"], average_rating: 4.2 });
   expect(item).toMatchObject({ cover: "https://p/x.jpg", year: 1999, genres: ["Drama"], rating: 4.2 });
 });
+
+test("demo items without a poster get a distinct catalog item with a poster", async () => {
+  const { buildPosterSubstitutes } = await import("./data");
+  const base = { creator: "", year: 0, rating: 0, genres: [], synopsis: "", logs: 0 };
+  const seed = [{ ...base, id: "a", title: "A", category: "film" as const, cover: "" }, { ...base, id: "b", title: "B", category: "film" as const, cover: "" }];
+  const cat = [{ ...base, id: "x", title: "X", category: "film" as const, cover: "u1" }, { ...base, id: "y", title: "Y", category: "film" as const, cover: "u2" }];
+  const map = buildPosterSubstitutes(seed, cat);
+  expect(map.get("a")?.id).toBe("x");
+  expect(map.get("b")?.id).toBe("y");
+});
